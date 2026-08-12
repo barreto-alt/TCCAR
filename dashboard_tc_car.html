@@ -4,203 +4,151 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TC CAR — Dashboard RH 2026</title>
+<!-- API_URL: cole aqui a URL do seu Google Apps Script após publicar -->
+<script>const API_URL = 'https://script.google.com/macros/s/AKfycbyZJIfpZ0m8UVYfpbH_kW6lGvFkdJ2VmGcLnK9AC4OPVu58kK50kFuYiWUKlWfQgC0t9w/exec';</script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; color: #1a1a2e; }
 
 header {
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
-  color: white; padding: 18px 32px;
-  display: flex; align-items: center; justify-content: space-between;
+  color: white; padding: 16px 28px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
 }
-header h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: 1px; }
-.header-right { display: flex; align-items: center; gap: 12px; }
-.header-right span { font-size: 0.8rem; opacity: 0.6; }
-.btn-reset {
-  padding: 6px 14px; border-radius: 6px; border: 1px solid rgba(255,255,255,.3);
-  background: rgba(255,255,255,.1); color: white; cursor: pointer; font-size: 0.78rem;
-  transition: background .2s;
-}
-.btn-reset:hover { background: rgba(255,0,0,.3); }
-
-.save-indicator {
-  font-size: 0.75rem; padding: 4px 10px; border-radius: 12px;
-  background: rgba(16,185,129,.25); color: #6ee7b7;
-  opacity: 0; transition: opacity .4s;
-}
+header h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: 1px; white-space: nowrap; }
+.header-right { display: flex; align-items: center; gap: 10px; }
+.save-indicator { font-size: 0.73rem; padding: 3px 10px; border-radius: 12px; background: rgba(16,185,129,.25); color: #6ee7b7; opacity: 0; transition: opacity .4s; }
 .save-indicator.show { opacity: 1; }
+.save-indicator.warn { background: rgba(245,158,11,.25); color: #fcd34d; }
+#loading-overlay { display:none; position:fixed; inset:0; background:rgba(15,52,96,.55); z-index:999; align-items:center; justify-content:center; flex-direction:column; gap:12px; }
+#loading-overlay.show { display:flex; }
+.spinner { width:40px; height:40px; border:4px solid rgba(255,255,255,.2); border-top-color:#fff; border-radius:50%; animation:spin .8s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+#loading-overlay p { color:white; font-size:.9rem; font-weight:600; }
+.btn-reset { padding: 5px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,.3); background: rgba(255,255,255,.1); color: white; cursor: pointer; font-size: 0.75rem; }
+.btn-reset:hover { background: rgba(220,38,38,.4); }
 
-.tabs { display: flex; background: #fff; border-bottom: 2px solid #e0e4ef; padding: 0 32px; }
-.tab {
-  padding: 13px 26px; cursor: pointer; font-size: 0.88rem; font-weight: 600;
-  border-bottom: 3px solid transparent; margin-bottom: -2px; color: #6b7280; transition: all .2s;
-}
+.tabs { display: flex; background: #fff; border-bottom: 2px solid #e0e4ef; padding: 0 28px; }
+.tab { padding: 12px 24px; cursor: pointer; font-size: 0.87rem; font-weight: 600; border-bottom: 3px solid transparent; margin-bottom: -2px; color: #6b7280; transition: all .2s; }
 .tab:hover { color: #0f3460; }
 .tab.active { color: #0f3460; border-bottom-color: #e94560; }
 
-.content { display: none; padding: 24px 32px; }
+.content { display: none; padding: 22px 28px; }
 .content.active { display: block; }
 
-.kpi-row { display: flex; gap: 14px; margin-bottom: 22px; flex-wrap: wrap; }
-.kpi {
-  background: white; border-radius: 12px; padding: 16px 22px;
-  flex: 1; min-width: 140px; border-left: 4px solid #e94560;
-  box-shadow: 0 2px 8px rgba(0,0,0,.06);
-}
+.kpi-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+.kpi { background: white; border-radius: 12px; padding: 14px 20px; flex: 1; min-width: 130px; border-left: 4px solid #e94560; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
 .kpi.green { border-left-color: #10b981; }
 .kpi.blue { border-left-color: #3b82f6; }
 .kpi.purple { border-left-color: #8b5cf6; }
 .kpi.orange { border-left-color: #f59e0b; }
-.kpi-val { font-size: 1.8rem; font-weight: 800; color: #1a1a2e; line-height: 1; }
-.kpi-label { font-size: 0.75rem; color: #6b7280; margin-top: 4px; }
+.kpi.gray { border-left-color: #9ca3af; }
+.kpi-val { font-size: 1.7rem; font-weight: 800; color: #1a1a2e; line-height: 1; }
+.kpi-label { font-size: 0.73rem; color: #6b7280; margin-top: 3px; }
 
-.toolbar { display: flex; gap: 10px; margin-bottom: 14px; align-items: center; flex-wrap: wrap; }
-.search {
-  padding: 8px 13px; border: 1px solid #d1d5db; border-radius: 8px;
-  font-size: 0.83rem; width: 240px; outline: none;
-}
+.toolbar { display: flex; gap: 10px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
+.search { padding: 7px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.82rem; width: 220px; outline: none; }
 .search:focus { border-color: #0f3460; }
-.filter-select {
-  padding: 8px 13px; border: 1px solid #d1d5db; border-radius: 8px;
-  font-size: 0.83rem; background: white; outline: none; cursor: pointer;
-}
-.count-lbl { font-size: 0.78rem; color: #9ca3af; margin-left: auto; }
-
-.btn-add {
-  padding: 8px 16px; background: #0f3460; color: white; border: none;
-  border-radius: 8px; cursor: pointer; font-size: 0.82rem; font-weight: 600;
-  transition: background .2s;
-}
+.fsel { padding: 7px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.82rem; background: white; outline: none; cursor: pointer; }
+.count-lbl { font-size: 0.76rem; color: #9ca3af; margin-left: auto; }
+.btn-add { padding: 7px 14px; background: #0f3460; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 600; }
 .btn-add:hover { background: #e94560; }
 
-tr.demitido td { opacity: .45; text-decoration: line-through; background: #f9fafb !important; }
-tr.demitido:hover td { background: #f3f4f6 !important; }
-tr.demitido .badge { filter: grayscale(1); }
+.hint { font-size: 0.73rem; color: #9ca3af; margin-bottom: 12px; }
 
-.section-title {
-  font-size: 0.95rem; font-weight: 700; color: #1a1a2e;
-  margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
-}
-.section-title::before {
-  content: ''; display: inline-block; width: 4px; height: 16px;
-  background: #e94560; border-radius: 2px;
-}
-
-.hint { font-size: 0.75rem; color: #9ca3af; margin-bottom: 14px; }
+.section-title { font-size: 0.93rem; font-weight: 700; color: #1a1a2e; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.section-title::before { content: ''; display: inline-block; width: 4px; height: 16px; background: #e94560; border-radius: 2px; }
 
 .table-wrap { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.06); overflow: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 0.81rem; }
-th {
-  background: #1a1a2e; color: white; padding: 10px 12px;
-  text-align: left; font-weight: 600; white-space: nowrap;
-  position: sticky; top: 0; z-index: 2; cursor: pointer; user-select: none;
-}
-th:hover { background: #0f3460; }
-th.no-sort { cursor: default; }
-th.no-sort:hover { background: #1a1a2e; }
-td {
-  padding: 8px 12px; border-bottom: 1px solid #f0f2f5; vertical-align: middle;
-}
+table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+th { background: #1a1a2e; color: white; padding: 9px 11px; text-align: left; font-weight: 600; white-space: nowrap; position: sticky; top: 0; z-index: 2; }
+th.sort { cursor: pointer; }
+th.sort:hover { background: #0f3460; }
+td { padding: 7px 11px; border-bottom: 1px solid #f0f2f5; vertical-align: middle; }
 tr:last-child td { border-bottom: none; }
 tr:hover td { background: #fafbff; }
 
-/* Editable cells */
-td[contenteditable="true"] {
-  outline: none; min-width: 60px;
-}
-td[contenteditable="true"]:focus {
-  background: #eff6ff !important; border-bottom: 2px solid #3b82f6;
-  box-shadow: inset 0 -2px 0 #3b82f6;
-}
-td[contenteditable="true"]:empty:before {
-  content: attr(data-placeholder); color: #d1d5db; font-style: italic;
-}
+td[contenteditable="true"] { outline: none; }
+td[contenteditable="true"]:focus { background: #eff6ff !important; border-bottom: 2px solid #3b82f6; }
+td[contenteditable="true"]:empty:before { content: attr(data-ph); color: #d1d5db; font-style: italic; }
 
-.badge {
-  display: inline-block; padding: 2px 10px; border-radius: 20px;
-  font-size: 0.71rem; font-weight: 600; cursor: pointer; user-select: none;
-}
+.badge { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 0.69rem; font-weight: 600; cursor: pointer; user-select: none; }
 .badge:hover { opacity: .8; }
-.bg-green { background: #d1fae5; color: #065f46; }
-.bg-red { background: #fee2e2; color: #991b1b; }
+.bg-green  { background: #d1fae5; color: #065f46; }
+.bg-red    { background: #fee2e2; color: #991b1b; }
 .bg-yellow { background: #fef3c7; color: #92400e; }
-.bg-gray { background: #f3f4f6; color: #4b5563; }
-.bg-blue { background: #dbeafe; color: #1e40af; }
+.bg-gray   { background: #f3f4f6; color: #6b7280; }
+.bg-blue   { background: #dbeafe; color: #1e40af; }
 .bg-purple { background: #ede9fe; color: #5b21b6; }
 
 .salary { font-weight: 600; color: #065f46; }
-.obs-cell { font-size: 0.74rem; color: #6b7280; min-width: 150px; }
-
-.btn-del {
-  background: none; border: none; cursor: pointer; color: #d1d5db;
-  font-size: 1rem; padding: 2px 6px; border-radius: 4px; transition: color .15s;
-}
+.obs-cell { font-size: 0.73rem; color: #6b7280; min-width: 140px; }
+.btn-del { background: none; border: none; cursor: pointer; color: #d1d5db; font-size: .95rem; padding: 1px 5px; border-radius: 4px; }
 .btn-del:hover { color: #ef4444; background: #fee2e2; }
+.no-results { text-align: center; padding: 32px; color: #9ca3af; font-size: .86rem; }
 
-.no-results { text-align: center; padding: 36px; color: #9ca3af; font-size: 0.88rem; }
+tr.demitido td { opacity: .42; text-decoration: line-through; background: #f9fafb !important; }
+tr.demitido:hover td { background: #f3f4f6 !important; }
 
 .venc-ok { color: #10b981; }
 .venc-warn { color: #f59e0b; font-weight: 600; }
 .venc-late { color: #ef4444; font-weight: 600; }
-
-/* Inline select for dropdowns */
-td .inline-select {
-  border: none; background: transparent; font-size: 0.81rem;
-  color: inherit; cursor: pointer; outline: none; width: 100%;
-}
 </style>
 </head>
 <body>
 
+<div id="loading-overlay"><div class="spinner"></div><p id="loading-msg">Carregando dados...</p></div>
+
 <header>
   <h1>🚗 TC CAR — Dashboard RH 2026</h1>
   <div class="header-right">
-    <span id="save-indicator" class="save-indicator">✓ Salvo</span>
+    <span id="save-ind" class="save-indicator">✓ Salvo</span>
     <button class="btn-reset" onclick="confirmReset()">↺ Restaurar original</button>
-    <span style="opacity:.5;font-size:.8rem">Atualizado 12/08/2026</span>
   </div>
 </header>
 
 <div class="tabs">
-  <div class="tab active" onclick="showTab('colaboradores')">👥 Colaboradores</div>
+  <div class="tab active" onclick="showTab('colab')">👥 Colaboradores</div>
   <div class="tab" onclick="showTab('pcmso')">🩺 PCMSO</div>
   <div class="tab" onclick="showTab('ferias')">🌴 Férias</div>
 </div>
 
 <!-- COLABORADORES -->
-<div id="tab-colaboradores" class="content active">
+<div id="tab-colab" class="content active">
   <div class="kpi-row">
     <div class="kpi green"><div class="kpi-val" id="k-ativos">—</div><div class="kpi-label">Ativos</div></div>
-    <div class="kpi" style="border-left-color:#f59e0b"><div class="kpi-val" id="k-afastados">—</div><div class="kpi-label">Afastados</div></div>
-    <div class="kpi" style="border-left-color:#6b7280"><div class="kpi-val" id="k-demitidos">—</div><div class="kpi-label">Demitidos</div></div>
+    <div class="kpi orange"><div class="kpi-val" id="k-afastados">—</div><div class="kpi-label">Afastados</div></div>
+    <div class="kpi gray"><div class="kpi-val" id="k-demitidos">—</div><div class="kpi-label">Demitidos</div></div>
     <div class="kpi blue"><div class="kpi-val" id="k-folha">—</div><div class="kpi-label">Folha Bruta Est.</div></div>
     <div class="kpi purple"><div class="kpi-val" id="k-custo">—</div><div class="kpi-label">Custo Total (1,5x)</div></div>
     <div class="kpi orange"><div class="kpi-val" id="k-ajuda">—</div><div class="kpi-label">Ajuda de Custo</div></div>
   </div>
   <div class="section-title">Lista de Colaboradores</div>
-  <p class="hint">💡 Clique em qualquer célula para editar. Clique no status para alternar. Use ✕ para remover linha.</p>
+  <p class="hint">💡 Clique em qualquer célula para editar · Badge de status: Ativo → Afastado → Demitido · Demitidos vão para o final</p>
   <div class="toolbar">
-    <input class="search" type="text" placeholder="🔍 Buscar nome ou cargo…" oninput="filterColab(this.value)">
-    <select class="filter-select" onchange="filterColabStatus(this.value)">
-      <option value="">Todos</option><option value="Ativo">Ativo</option><option value="Afastado">Afastado</option><option value="Demitido">Demitido</option><option value="__hide_dem">Ocultar demitidos</option>
+    <input class="search" type="text" placeholder="🔍 Nome ou cargo…" oninput="F.colab.q=this.value;render('colab')">
+    <select class="fsel" onchange="F.colab.st=this.value;render('colab')">
+      <option value="">Todos</option><option value="Ativo">Ativo</option>
+      <option value="Afastado">Afastado</option><option value="Demitido">Demitido</option>
+      <option value="__hide_dem">Ocultar demitidos</option>
     </select>
-    <button class="btn-add" onclick="addColabRow()">+ Adicionar colaborador</button>
-    <span class="count-lbl" id="colab-count"></span>
+    <button class="btn-add" onclick="addColab()">+ Novo colaborador</button>
+    <span class="count-lbl" id="cnt-colab"></span>
   </div>
   <div class="table-wrap">
     <table>
       <thead><tr>
-        <th class="no-sort" style="width:36px"></th>
-        <th onclick="sortC('colab',0)">Nº ↕</th>
-        <th onclick="sortC('colab',1)">Nome ↕</th>
-        <th onclick="sortC('colab',2)">Cargo ↕</th>
-        <th onclick="sortC('colab',3)">Salário ↕</th>
-        <th class="no-sort">Status</th>
-        <th onclick="sortC('colab',5)">Ajuda Custo ↕</th>
-        <th onclick="sortC('colab',6)">Custo Total ↕</th>
-        <th class="no-sort">Observações</th>
+        <th style="width:32px"></th>
+        <th class="sort" onclick="S('colab',0)">Nº ↕</th>
+        <th class="sort" onclick="S('colab',1)">Nome ↕</th>
+        <th class="sort" onclick="S('colab',2)">Cargo ↕</th>
+        <th class="sort" onclick="S('colab',3)">Salário ↕</th>
+        <th>Status</th>
+        <th class="sort" onclick="S('colab',5)">Ajuda Custo ↕</th>
+        <th class="sort" onclick="S('colab',6)">Custo Total ↕</th>
+        <th>Observações</th>
       </tr></thead>
-      <tbody id="colab-body"></tbody>
+      <tbody id="body-colab"></tbody>
     </table>
   </div>
 </div>
@@ -208,34 +156,34 @@ td .inline-select {
 <!-- PCMSO -->
 <div id="tab-pcmso" class="content">
   <div class="kpi-row">
-    <div class="kpi green"><div class="kpi-val" id="k-p-ativos">—</div><div class="kpi-label">Ativos PCMSO</div></div>
-    <div class="kpi" style="border-left-color:#ef4444"><div class="kpi-val" id="k-p-inat">—</div><div class="kpi-label">Desligados</div></div>
+    <div class="kpi green"><div class="kpi-val" id="k-p-at">—</div><div class="kpi-label">Ativos</div></div>
+    <div class="kpi" style="border-left-color:#ef4444"><div class="kpi-val" id="k-p-in">—</div><div class="kpi-label">Desligados</div></div>
     <div class="kpi orange"><div class="kpi-val" id="k-p-pend">—</div><div class="kpi-label">Sem Situação</div></div>
-    <div class="kpi blue"><div class="kpi-val" id="k-p-total">—</div><div class="kpi-label">Total Registros</div></div>
+    <div class="kpi blue"><div class="kpi-val" id="k-p-tot">—</div><div class="kpi-label">Total Registros</div></div>
   </div>
-  <div class="section-title">Registro PCMSO</div>
-  <p class="hint">💡 Clique em qualquer célula para editar. Clique no badge de situação para alternar entre Ativo / Desligado / Pendente.</p>
+  <div class="section-title">Registro PCMSO — todos os colaboradores</div>
+  <p class="hint">💡 Clique em qualquer célula para editar · Badge de situação e sexo: clique para alternar · Demitidos ficam em cinza</p>
   <div class="toolbar">
-    <input class="search" type="text" placeholder="🔍 Buscar nome ou cargo…" oninput="filterPcmso(this.value)">
-    <select class="filter-select" onchange="filterPcmsoSit(this.value)">
-      <option value="">Todos</option><option value="S">Ativo</option><option value="N">Desligado</option><option value="null">Sem situação</option>
+    <input class="search" type="text" placeholder="🔍 Nome ou cargo…" oninput="F.pcmso.q=this.value;render('pcmso')">
+    <select class="fsel" onchange="F.pcmso.sit=this.value;render('pcmso')">
+      <option value="">Todos</option><option value="S">Ativo</option>
+      <option value="N">Desligado</option><option value="">Sem situação</option>
     </select>
-    <button class="btn-add" onclick="addPcmsoRow()">+ Adicionar registro</button>
-    <span class="count-lbl" id="pcmso-count"></span>
+    <span class="count-lbl" id="cnt-pcmso"></span>
   </div>
   <div class="table-wrap">
     <table>
       <thead><tr>
-        <th class="no-sort" style="width:36px"></th>
-        <th onclick="sortC('pcmso',0)">Nome ↕</th>
-        <th onclick="sortC('pcmso',1)">Cargo ↕</th>
-        <th class="no-sort">Setor</th>
-        <th onclick="sortC('pcmso',3)">Admissão ↕</th>
-        <th onclick="sortC('pcmso',4)">Demissão ↕</th>
-        <th class="no-sort">Situação</th>
-        <th class="no-sort">Sexo</th>
+        <th class="sort" onclick="S('pcmso',1)">Nome ↕</th>
+        <th class="sort" onclick="S('pcmso',2)">Cargo ↕</th>
+        <th>Status RH</th>
+        <th>Setor</th>
+        <th class="sort" onclick="S('pcmso',3)">Admissão ↕</th>
+        <th class="sort" onclick="S('pcmso',4)">Demissão ↕</th>
+        <th>Situação PCMSO</th>
+        <th>Sexo</th>
       </tr></thead>
-      <tbody id="pcmso-body"></tbody>
+      <tbody id="body-pcmso"></tbody>
     </table>
   </div>
 </div>
@@ -243,544 +191,596 @@ td .inline-select {
 <!-- FÉRIAS -->
 <div id="tab-ferias" class="content">
   <div class="kpi-row">
-    <div class="kpi green"><div class="kpi-val" id="k-f-total">—</div><div class="kpi-label">Com Férias Registradas</div></div>
-    <div class="kpi orange"><div class="kpi-val" id="k-f-saldo">—</div><div class="kpi-label">Com Saldo Aberto</div></div>
+    <div class="kpi green"><div class="kpi-val" id="k-f-com">—</div><div class="kpi-label">Com Período Registrado</div></div>
+    <div class="kpi orange"><div class="kpi-val" id="k-f-sal">—</div><div class="kpi-label">Com Saldo Aberto</div></div>
     <div class="kpi blue"><div class="kpi-val" id="k-f-dias">—</div><div class="kpi-label">Total Dias Fruídos</div></div>
     <div class="kpi" style="border-left-color:#e94560"><div class="kpi-val" id="k-f-venc">—</div><div class="kpi-label">Vencendo em 90 dias</div></div>
   </div>
-  <div class="section-title">Controle de Férias 2026</div>
-  <p class="hint">💡 Clique em qualquer célula para editar.</p>
+  <div class="section-title">Controle de Férias — todos os colaboradores</div>
+  <p class="hint">💡 Clique em qualquer célula para editar · Data limite em laranja = vence em 90 dias · vermelho = vencido</p>
   <div class="toolbar">
-    <input class="search" type="text" placeholder="🔍 Buscar nome…" oninput="filterFerias(this.value)">
-    <button class="btn-add" onclick="addFeriasRow()">+ Adicionar registro</button>
-    <span class="count-lbl" id="ferias-count"></span>
+    <input class="search" type="text" placeholder="🔍 Nome…" oninput="F.ferias.q=this.value;render('ferias')">
+    <span class="count-lbl" id="cnt-ferias"></span>
   </div>
   <div class="table-wrap">
     <table>
       <thead><tr>
-        <th class="no-sort" style="width:36px"></th>
-        <th onclick="sortC('ferias',0)">Nome ↕</th>
-        <th class="no-sort">Período Aquisitivo</th>
-        <th onclick="sortC('ferias',2)">Data Limite ↕</th>
-        <th onclick="sortC('ferias',3)">Data Férias ↕</th>
-        <th onclick="sortC('ferias',4)">Dias ↕</th>
-        <th onclick="sortC('ferias',5)">Saldo ↕</th>
-        <th class="no-sort">Situação</th>
-        <th class="no-sort">Obs</th>
+        <th class="sort" onclick="S('ferias',1)">Nome ↕</th>
+        <th>Status RH</th>
+        <th>Período Aquisitivo</th>
+        <th class="sort" onclick="S('ferias',4)">Data Limite ↕</th>
+        <th class="sort" onclick="S('ferias',5)">Data Férias ↕</th>
+        <th class="sort" onclick="S('ferias',6)">Dias ↕</th>
+        <th class="sort" onclick="S('ferias',7)">Saldo ↕</th>
+        <th>Situação</th>
+        <th>Obs</th>
       </tr></thead>
-      <tbody id="ferias-body"></tbody>
+      <tbody id="body-ferias"></tbody>
     </table>
   </div>
 </div>
 
 <script>
-// ─── DEFAULTS ───────────────────────────────────────────────────────────────
-const DEFAULTS = {
-  colab: [
-    [1,'JULIA CORREIA SILVA','ANALISTA ADMINISTRATIVO E FINANCEIRO',3000,'Ativo',0,4500,'férias dia 19 e volta dia 12 -- 20 dias'],
-    [2,'MARCILIO SOUZA DOS SANTOS','COORDENADOR TÉCNICO DE QUALIDADE',4500,'Ativo',0,6750,'férias ok'],
-    [3,'FELIPE NARDES OLIVEIRA','ESTOQUISTA',2500,'Ativo',200,3750,'trabalhar até 19 dez; férias 20 dias'],
-    [4,'MARCO ANTONIO RIBEIRO DE SOUZA','FUNILEIRO',0,'Afastado',0,0,'Afastado'],
-    [5,'MATHEUS PETILIO BORGES','FUNILEIRO',4200,'Ativo',0,6300,'férias de 15 dias. 18 a 02 jan'],
-    [6,'ROOSEVELT CHINA','FUNILEIRO',5000,'Ativo',100,7500,'trabalha normal'],
-    [7,'SEBASTIAO GONCALO DOS SANTOS','FUNILEIRO MONTADOR',6008,'Ativo',0,9012,''],
-    [8,'CARLOS','FUNILEIRO SEM REGISTRO',6000,'Ativo',0,9000,'pago semanalmente 1500/semana'],
-    [9,'RODOLFO UZUM SIQUEIRA CORREIA','CONSULTOR DE RELACIONAMENTO E VENDAS',3500,'Ativo',0,5250,'férias de 15 dias. 18 a 02 jan'],
-    [10,'ADRIANO','ORÇAMENTISTA 2',3000,'Ativo',150,4500,'benefícios + 2000 por metas'],
-    [11,'JOSÉ APARECIDO','MECÂNICO',3500,'Ativo',100,5250,'deve 3 dias referente ao natal'],
-    [12,'BRAULIO HENRIQUE','MECÂNICO',3200,'Ativo',0,4800,'montar caixa de ferramentas'],
-    [13,'ERIC OLIVEIRA DA SILVA','TÉCNICO DE MONTAGEM E QUALIDADE',3216,'Ativo',200,4824,'férias de 15 dias 18 a 02'],
-    [14,'WASHINGTON SILVA GERMANO FILHO','MONTADOR',3700,'Ativo',0,5550,'talvez férias a partir de 6 jan'],
-    [15,'JOAO PAULO','MONTADOR',2800,'Ativo',100,4200,''],
-    [16,'GABRIEL ALBUQUERQUE SILVA','MONTADOR',3000,'Ativo',100,4500,''],
-    [17,'VALDOMIRO RICARDO DA SILVA FILHO','MONTADOR 2',3216,'Ativo',0,4824,'30 dias de férias; volta 19 jan'],
-    [18,'CRISTOPHER','MONTADOR',2800,'Ativo',100,4200,'vai trabalhar normal'],
-    [19,'TIAGO HIDEKI YOGUI','ORÇAMENTISTA TÉCNICO',3500,'Ativo',200,5250,''],
-    [20,'IGOR','CHEFE DE OFICINA',6800,'Ativo',0,10200,'meta 12k total'],
-    [21,'JERRY','MONTADOR',3000,'Ativo',100,4500,''],
-    [22,'MATEUS WILIAN','PINTOR',4000,'Ativo',300,6000,'5400 na mão total'],
-    [23,'JACKSON','PINTOR',3500,'Ativo',100,5250,'férias de 15 dias 18 a 02'],
-    [24,'JADSON','PINTOR',6000,'Ativo',100,9000,''],
-    [25,'RAFAEL','PINTOR',3800,'Ativo',0,5700,''],
-    [26,'IGOR','PINTOR',4200,'Ativo',0,6300,'pagamento semanal até junho'],
-    [27,'HUMBERTO MARTINS SIMOES','PINTOR',0,'Afastado',0,0,'Afastado'],
-    [28,'ANTONIO TONINHO','PINTOR',4600,'Ativo',0,6900,'férias de 15 dias 18 a 02'],
-    [29,'ALANA','PREPARADORA',2800,'Ativo',100,4200,'receber 4000 total'],
-    [31,'NICOLLAS','AJUDANTE DE PINTOR',1500,'Ativo',140,2250,''],
-    [32,'ALEXANDRE','PINTOR',4000,'Ativo',0,6000,''],
-    [33,'PAULO CESAR SANTANA DA SILVA','POLIDOR',3200,'Ativo',230,4800,'registrar em 2027'],
-    [34,'MATEUS','POLIDOR',2500,'Ativo',400,3750,'férias sai 19 retorna 5 jan'],
-    [35,'ANTONIO','POLIDOR',2450,'Ativo',100,3675,''],
-    [36,'MATEUS INDICAÇÃO BOLA','PINTOR',6000,'Ativo',0,9000,'pagar 1500/semana'],
-    [37,'JOAO MATHEUS DA SILVA SERAFIM','CONTROLADOR DE PÁTIO E OPERAÇÕES',3000,'Ativo',0,4500,'vai tirar 5 dias e vender o restante'],
-  ],
-  pcmso: [
-    ['BRUNO HENRIQUE FELIZARDO DOS SANTOS','PINTOR','OFICINA','2023-04-25','','S','M'],
-    ['FELIPE NARDES OLIVEIRA','LAVADOR','OFICINA','2023-10-10','','S','M'],
-    ['GABRIEL ALBUQUERQUE SILVA','MONTADOR I','OFICINA','2021-11-11','','S','M'],
-    ['HUDSON LUIZ OLIVEIRA CASTRO','POLIDOR','OFICINA','2024-11-11','','S','M'],
-    ['HUMBERTO MARTINS SIMOES','PINTOR I','OFICINA','2021-10-22','','S','M'],
-    ['JOAO MATHEUS DA SILVA SERAFIM','RECEPCIONISTA','ADMINISTRATIVO','2023-03-27','','S','M'],
-    ['JULIA CORREIA SILVA','AUXILIAR ADMINISTRATIVO','ADMINISTRATIVO','2021-09-01','','S','F'],
-    ['MARCILIO SOUZA DOS SANTOS','MONTADOR III','OFICINA','2021-07-01','','S','M'],
-    ['MARCO ANTONIO RIBEIRO DE SOUZA','FUNILEIRO','OFICINA','2022-08-26','','S','M'],
-    ['MATHEUS FRANCA DE QUEIROGA','PINTOR','OFICINA','2025-04-15','','S','M'],
-    ['MATHEUS PETILIO BORGES','FUNILEIRO','OFICINA','2023-08-18','','S','M'],
-    ['PAULO CESAR SANTANA DA SILVA','POLIDOR','OFICINA','2021-07-01','','S','M'],
-    ['RODOLFO UZUM SIQUEIRA CORREIA','GERENTE DE PRODUCAO','ADMINISTRATIVO','2021-08-02','','S','M'],
-    ['TIAGO HIDEKI YOGUI','ORCAMENTISTA I','ADMINISTRATIVO','2022-11-10','','S','M'],
-    ['VALDOMIRO RICARDO DA SILVA FILHO','MONTADOR II','OFICINA','2022-06-20','','S','M'],
-    ['WASHINGTON SILVA GERMANO FILHO','MONTADOR','OFICINA','2023-10-17','','S','M'],
-    ['SEBASTIAO GONCALO DOS SANTOS','FUNILEIRO MONTADOR','OFICINA','2023-02-09','','S','M'],
-    ['ANTONIO PAULO AMORIM SOUZA','PINTOR III','OFICINA','2022-04-01','','S','M'],
-    ['ERIC OLIVEIRA DA SILVA','MONTADOR','OFICINA','2024-04-19','','S','M'],
-    ['ALISSON OLIVEIRA DOS SANTOS','PINTOR','OFICINA','2025-04-15','','S','M'],
-    ['FABIANO DE SOUZA','FUNILEIRO','OFICINA','2024-12-03','','S','M'],
-    ['JACKSON PEREIRA DOS SANTOS','PINTOR','OFICINA','2025-04-15','','S','M'],
-    ['LUIS MILLER AGUILAR DE OLIVEIRA','POLIDOR','OFICINA','2025-04-15','','S','M'],
-    ['WAGNER MARCULO','PINTOR','OFICINA','2024-12-03','','S','M'],
-    ['ALEX SANDRO RODRIGUES CAVALCANTI','PINTOR','OFICINA','2023-08-18','2024-07-06','N','M'],
-    ['JADSON RODRIGUES DO NASCIMENTO','PINTOR','OFICINA','2022-04-01','2024-07-19','N','M'],
-    ['ROOSEVELT CHINA','','OFICINA','','','','M'],
-    ['CARLOS','','OFICINA','','','','M'],
-    ['ADRIANO','','ADMINISTRATIVO','','','','M'],
-    ['JOSE APARECIDO','','OFICINA','','','','M'],
-    ['BRAULIO HENRIQUE','','OFICINA','','','','M'],
-    ['IGOR (CHEFE DE OFICINA)','','OFICINA','','','','M'],
-    ['JERRY','','OFICINA','','','','M'],
-    ['MATEUS WILIAN','','OFICINA','','','','M'],
-    ['JACKSON','','OFICINA','','','','M'],
-    ['JADSON (PINTOR)','','OFICINA','','','','M'],
-    ['RAFAEL','','OFICINA','','','','M'],
-    ['ALANA','','OFICINA','','','','F'],
-  ],
-  ferias: [
-    ['BRUNO HENRIQUE FELIZARDO DOS SANTOS','25/04/2023 a 24/04/2024','2026-05-18','2025-12-18',15,0,''],
-    ['JOAO MATHEUS DA SILVA SERAFIM','27/03/2024 a 26/03/2025','2026-02-25','2026-02-09',20,0,'Compramos 10 dias'],
-    ['ANTONIO PAULO AMORIM SOUZA','01/04/2024 a 31/03/2025','2026-03-17','2025-12-18',15,0,''],
-    ['ERIC OLIVEIRA DA SILVA','19/04/2024 a 18/04/2025','2026-04-02','2025-12-18',8,7,'Tirou 7 dias; faltam 8'],
-    ['VALDOMIRO RICARDO DA SILVA FILHO','20/06/2024 a 19/06/2025','2026-05-21','2025-12-18',30,0,''],
-    ['MARCILIO SOUZA DOS SANTOS','01/07/2024 a 30/06/2025','2026-06-01','2026-01-05',30,0,''],
-    ['RODOLFO UZUM SIQUEIRA CORREIA','02/08/2024 a 01/08/2025','2026-07-02','2025-12-22',15,15,''],
-    ['MATHEUS PETILIO BORGES','18/08/2024 a 17/08/2025','2026-07-16','2025-12-18',20,0,'Compramos 10 dias'],
-    ['JULIA CORREIA SILVA','01/09/2024 a 31/08/2025','2026-07-30','2025-12-22',20,19,''],
-    ['FELIPE NARDES OLIVEIRA','10/10/2024 a 09/10/2025','2026-09-10','2025-12-22',20,0,'Compramos 10 dias'],
-    ['WASHINGTON SILVA GERMANO FILHO','17/10/2024 a 16/10/2025','2026-09-17','2026-01-12',30,0,''],
-    ['TIAGO HIDEKI YOGUI','10/11/2024 a 09/11/2025','2026-10-08','2026-10-05',20,0,'Compramos 10 dias'],
-    ['GABRIEL ALBUQUERQUE SILVA','11/11/2024 a 10/11/2025','2026-10-08','2025-12-18',15,15,''],
-    ['MATHEUS RUAS','','','2025-12-18',15,-15,'Adiantamento'],
-    ['JACKSON','','','2025-12-18',15,-15,'Adiantamento'],
-  ]
-};
+// ═══════════════════════════════════════════════════════════════════
+// DATA MODEL — um único array de colaboradores (master)
+// Cada item: { id, num, nome, cargo, salario, status, ajuda, custo, obs,
+//              pcmso: { setor, admissao, demissao, situacao, sexo },
+//              ferias: { periodo, limite, data, dias, saldo, obs } }
+// ═══════════════════════════════════════════════════════════════════
 
-// ─── STATE ──────────────────────────────────────────────────────────────────
-let DATA = { colab: [], pcmso: [], ferias: [] };
-let FILTERS = {
-  colab: { search: '', status: '' },
-  pcmso: { search: '', sit: '' },
-  ferias: { search: '' }
-};
-let SORTS = {
-  colab: [0, 1], pcmso: [0, 1], ferias: [0, 1]
-};
+function mkId() { return '_' + Math.random().toString(36).slice(2,9); }
+
+const DEFAULT_COLABS = [
+  {id:mkId(),num:1, nome:'JULIA CORREIA SILVA',              cargo:'ANALISTA ADMINISTRATIVO E FINANCEIRO',   salario:3000, status:'Ativo',   ajuda:0,   custo:4500,  obs:'férias dia 19 e volta dia 12 -- 20 dias',
+   pcmso:{setor:'ADMINISTRATIVO',admissao:'2021-09-01',demissao:'',situacao:'S',sexo:'F'},
+   ferias:{periodo:'01/09/2024 a 31/08/2025',limite:'2026-07-30',data:'2025-12-22',dias:20,saldo:19,obs:''}},
+
+  {id:mkId(),num:2, nome:'MARCILIO SOUZA DOS SANTOS',         cargo:'COORDENADOR TÉCNICO DE QUALIDADE',       salario:4500, status:'Ativo',   ajuda:0,   custo:6750,  obs:'férias ok',
+   pcmso:{setor:'OFICINA',admissao:'2021-07-01',demissao:'',situacao:'S',sexo:'M'},
+   ferias:{periodo:'01/07/2024 a 30/06/2025',limite:'2026-06-01',data:'2026-01-05',dias:30,saldo:0,obs:''}},
+
+  {id:mkId(),num:3, nome:'FELIPE NARDES OLIVEIRA',            cargo:'ESTOQUISTA',                             salario:2500, status:'Ativo',   ajuda:200, custo:3750,  obs:'férias 20 dias',
+   pcmso:{setor:'OFICINA',admissao:'2023-10-10',demissao:'',situacao:'S',sexo:'M'},
+   ferias:{periodo:'10/10/2024 a 09/10/2025',limite:'2026-09-10',data:'2025-12-22',dias:20,saldo:0,obs:'Compramos 10 dias'}},
+
+  {id:mkId(),num:4, nome:'MARCO ANTONIO RIBEIRO DE SOUZA',    cargo:'FUNILEIRO',                              salario:0,    status:'Afastado',ajuda:0,   custo:0,     obs:'Afastado',
+   pcmso:{setor:'OFICINA',admissao:'2022-08-26',demissao:'',situacao:'S',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:5, nome:'MATHEUS PETILIO BORGES',             cargo:'FUNILEIRO',                             salario:4200, status:'Ativo',   ajuda:0,   custo:6300,  obs:'férias de 15 dias',
+   pcmso:{setor:'OFICINA',admissao:'2023-08-18',demissao:'',situacao:'S',sexo:'M'},
+   ferias:{periodo:'18/08/2024 a 17/08/2025',limite:'2026-07-16',data:'2025-12-18',dias:20,saldo:0,obs:'Compramos 10 dias'}},
+
+  {id:mkId(),num:6, nome:'ROOSEVELT CHINA',                    cargo:'FUNILEIRO',                             salario:5000, status:'Ativo',   ajuda:100, custo:7500,  obs:'trabalha normal',
+   pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:7, nome:'SEBASTIAO GONCALO DOS SANTOS',       cargo:'FUNILEIRO MONTADOR',                    salario:6008, status:'Ativo',   ajuda:0,   custo:9012,  obs:'',
+   pcmso:{setor:'OFICINA',admissao:'2023-02-09',demissao:'',situacao:'S',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:8, nome:'CARLOS',                             cargo:'FUNILEIRO SEM REGISTRO',                salario:6000, status:'Ativo',   ajuda:0,   custo:9000,  obs:'pago 1500/semana',
+   pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:9, nome:'RODOLFO UZUM SIQUEIRA CORREIA',      cargo:'CONSULTOR DE RELACIONAMENTO E VENDAS',  salario:3500, status:'Ativo',   ajuda:0,   custo:5250,  obs:'férias de 15 dias',
+   pcmso:{setor:'ADMINISTRATIVO',admissao:'2021-08-02',demissao:'',situacao:'S',sexo:'M'},
+   ferias:{periodo:'02/08/2024 a 01/08/2025',limite:'2026-07-02',data:'2025-12-22',dias:15,saldo:15,obs:''}},
+
+  {id:mkId(),num:10,nome:'ADRIANO',                            cargo:'ORÇAMENTISTA 2',                        salario:3000, status:'Ativo',   ajuda:150, custo:4500,  obs:'benefícios + 2000 por metas',
+   pcmso:{setor:'ADMINISTRATIVO',admissao:'',demissao:'',situacao:'',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:11,nome:'JOSÉ APARECIDO',                     cargo:'MECÂNICO',                              salario:3500, status:'Ativo',   ajuda:100, custo:5250,  obs:'deve 3 dias natal',
+   pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:12,nome:'BRAULIO HENRIQUE',                   cargo:'MECÂNICO',                              salario:3200, status:'Ativo',   ajuda:0,   custo:4800,  obs:'montar caixa ferramentas',
+   pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:13,nome:'ERIC OLIVEIRA DA SILVA',             cargo:'TÉCNICO DE MONTAGEM E QUALIDADE',       salario:3216, status:'Ativo',   ajuda:200, custo:4824,  obs:'férias 15 dias',
+   pcmso:{setor:'OFICINA',admissao:'2024-04-19',demissao:'',situacao:'S',sexo:'M'},
+   ferias:{periodo:'19/04/2024 a 18/04/2025',limite:'2026-04-02',data:'2025-12-18',dias:8,saldo:7,obs:'Tirou 7 dias; faltam 8'}},
+
+  {id:mkId(),num:14,nome:'WASHINGTON SILVA GERMANO FILHO',     cargo:'MONTADOR',                              salario:3700, status:'Ativo',   ajuda:0,   custo:5550,  obs:'talvez férias 6 jan',
+   pcmso:{setor:'OFICINA',admissao:'2023-10-17',demissao:'',situacao:'S',sexo:'M'},
+   ferias:{periodo:'17/10/2024 a 16/10/2025',limite:'2026-09-17',data:'2026-01-12',dias:30,saldo:0,obs:''}},
+
+  {id:mkId(),num:15,nome:'JOAO PAULO',                         cargo:'MONTADOR',                              salario:2800, status:'Ativo',   ajuda:100, custo:4200,  obs:'',
+   pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:16,nome:'GABRIEL ALBUQUERQUE SILVA',          cargo:'MONTADOR',                              salario:3000, status:'Ativo',   ajuda:100, custo:4500,  obs:'',
+   pcmso:{setor:'OFICINA',admissao:'2021-11-11',demissao:'',situacao:'S',sexo:'M'},
+   ferias:{periodo:'11/11/2024 a 10/11/2025',limite:'2026-10-08',data:'2025-12-18',dias:15,saldo:15,obs:''}},
+
+  {id:mkId(),num:17,nome:'VALDOMIRO RICARDO DA SILVA FILHO',   cargo:'MONTADOR 2',                            salario:3216, status:'Ativo',   ajuda:0,   custo:4824,  obs:'30 dias férias',
+   pcmso:{setor:'OFICINA',admissao:'2022-06-20',demissao:'',situacao:'S',sexo:'M'},
+   ferias:{periodo:'20/06/2024 a 19/06/2025',limite:'2026-05-21',data:'2025-12-18',dias:30,saldo:0,obs:''}},
+
+  {id:mkId(),num:18,nome:'CRISTOPHER',                         cargo:'MONTADOR',                              salario:2800, status:'Ativo',   ajuda:100, custo:4200,  obs:'trabalha normal',
+   pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:19,nome:'TIAGO HIDEKI YOGUI',                 cargo:'ORÇAMENTISTA TÉCNICO',                  salario:3500, status:'Ativo',   ajuda:200, custo:5250,  obs:'',
+   pcmso:{setor:'ADMINISTRATIVO',admissao:'2022-11-10',demissao:'',situacao:'S',sexo:'M'},
+   ferias:{periodo:'10/11/2024 a 09/11/2025',limite:'2026-10-08',data:'2026-10-05',dias:20,saldo:0,obs:'Compramos 10 dias'}},
+
+  {id:mkId(),num:20,nome:'IGOR',                               cargo:'CHEFE DE OFICINA',                      salario:6800, status:'Ativo',   ajuda:0,   custo:10200, obs:'meta 12k total',
+   pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:21,nome:'JERRY',                              cargo:'MONTADOR',                              salario:3000, status:'Ativo',   ajuda:100, custo:4500,  obs:'',
+   pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:22,nome:'MATEUS WILIAN',                      cargo:'PINTOR',                                salario:4000, status:'Ativo',   ajuda:300, custo:6000,  obs:'5400 na mão total',
+   pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:23,nome:'JACKSON',                            cargo:'PINTOR',                                salario:3500, status:'Ativo',   ajuda:100, custo:5250,  obs:'férias 15 dias',
+   pcmso:{setor:'OFICINA',admissao:'2025-04-15',demissao:'',situacao:'S',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'2025-12-18',dias:15,saldo:-15,obs:'Adiantamento'}},
+
+  {id:mkId(),num:24,nome:'JADSON',                             cargo:'PINTOR',                                salario:6000, status:'Ativo',   ajuda:100, custo:9000,  obs:'',
+   pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:25,nome:'RAFAEL',                             cargo:'PINTOR',                                salario:3800, status:'Ativo',   ajuda:0,   custo:5700,  obs:'',
+   pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:26,nome:'IGOR (PINTOR)',                      cargo:'PINTOR',                                salario:4200, status:'Ativo',   ajuda:0,   custo:6300,  obs:'pagamento semanal até junho',
+   pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:27,nome:'HUMBERTO MARTINS SIMOES',            cargo:'PINTOR',                                salario:0,    status:'Afastado',ajuda:0,   custo:0,     obs:'Afastado',
+   pcmso:{setor:'OFICINA',admissao:'2021-10-22',demissao:'',situacao:'S',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:28,nome:'ANTONIO TONINHO',                    cargo:'PINTOR',                                salario:4600, status:'Ativo',   ajuda:0,   custo:6900,  obs:'férias 15 dias',
+   pcmso:{setor:'OFICINA',admissao:'2022-04-01',demissao:'',situacao:'S',sexo:'M'},
+   ferias:{periodo:'01/04/2024 a 31/03/2025',limite:'2026-03-17',data:'2025-12-18',dias:15,saldo:0,obs:''}},
+
+  {id:mkId(),num:29,nome:'ALANA',                              cargo:'PREPARADORA',                           salario:2800, status:'Ativo',   ajuda:100, custo:4200,  obs:'receber 4000 total',
+   pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'F'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:31,nome:'NICOLLAS',                           cargo:'AJUDANTE DE PINTOR',                    salario:1500, status:'Ativo',   ajuda:140, custo:2250,  obs:'',
+   pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:32,nome:'ALEXANDRE',                          cargo:'PINTOR',                                salario:4000, status:'Ativo',   ajuda:0,   custo:6000,  obs:'',
+   pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:33,nome:'PAULO CESAR SANTANA DA SILVA',       cargo:'POLIDOR',                               salario:3200, status:'Ativo',   ajuda:230, custo:4800,  obs:'registrar em 2027',
+   pcmso:{setor:'OFICINA',admissao:'2021-07-01',demissao:'',situacao:'S',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:34,nome:'MATEUS',                             cargo:'POLIDOR',                               salario:2500, status:'Ativo',   ajuda:400, custo:3750,  obs:'férias sai 19 retorna 5 jan',
+   pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:35,nome:'ANTONIO (POLIDOR)',                  cargo:'POLIDOR',                               salario:2450, status:'Ativo',   ajuda:100, custo:3675,  obs:'',
+   pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:36,nome:'MATEUS INDICAÇÃO BOLA',              cargo:'PINTOR',                                salario:6000, status:'Ativo',   ajuda:0,   custo:9000,  obs:'pagar 1500/semana',
+   pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:37,nome:'JOAO MATHEUS DA SILVA SERAFIM',      cargo:'CONTROLADOR DE PÁTIO E OPERAÇÕES',      salario:3000, status:'Ativo',   ajuda:0,   custo:4500,  obs:'tirar 5 dias e vender restante',
+   pcmso:{setor:'ADMINISTRATIVO',admissao:'2023-03-27',demissao:'',situacao:'S',sexo:'M'},
+   ferias:{periodo:'27/03/2024 a 26/03/2025',limite:'2026-02-25',data:'2026-02-09',dias:20,saldo:0,obs:'Compramos 10 dias'}},
+
+  {id:mkId(),num:38,nome:'BRUNO HENRIQUE FELIZARDO DOS SANTOS',cargo:'PINTOR',                                salario:0,    status:'Ativo',   ajuda:0,   custo:0,     obs:'',
+   pcmso:{setor:'OFICINA',admissao:'2023-04-25',demissao:'',situacao:'S',sexo:'M'},
+   ferias:{periodo:'25/04/2023 a 24/04/2024',limite:'2026-05-18',data:'2025-12-18',dias:15,saldo:0,obs:''}},
+
+  {id:mkId(),num:39,nome:'MATHEUS RUAS',                       cargo:'PINTOR',                                salario:0,    status:'Ativo',   ajuda:0,   custo:0,     obs:'',
+   pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'2025-12-18',dias:15,saldo:-15,obs:'Adiantamento'}},
+
+  {id:mkId(),num:40,nome:'ALISSON OLIVEIRA DOS SANTOS',        cargo:'PINTOR',                                salario:0,    status:'Ativo',   ajuda:0,   custo:0,     obs:'',
+   pcmso:{setor:'OFICINA',admissao:'2025-04-15',demissao:'',situacao:'S',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:41,nome:'FABIANO DE SOUZA',                   cargo:'FUNILEIRO',                             salario:0,    status:'Ativo',   ajuda:0,   custo:0,     obs:'',
+   pcmso:{setor:'OFICINA',admissao:'2024-12-03',demissao:'',situacao:'S',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:42,nome:'HUDSON LUIZ OLIVEIRA CASTRO',        cargo:'POLIDOR',                               salario:0,    status:'Ativo',   ajuda:0,   custo:0,     obs:'',
+   pcmso:{setor:'OFICINA',admissao:'2024-11-11',demissao:'',situacao:'S',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:43,nome:'LUIS MILLER AGUILAR DE OLIVEIRA',    cargo:'POLIDOR',                               salario:0,    status:'Ativo',   ajuda:0,   custo:0,     obs:'',
+   pcmso:{setor:'OFICINA',admissao:'2025-04-15',demissao:'',situacao:'S',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:44,nome:'WAGNER MARCULO',                     cargo:'PINTOR',                                salario:0,    status:'Ativo',   ajuda:0,   custo:0,     obs:'',
+   pcmso:{setor:'OFICINA',admissao:'2024-12-03',demissao:'',situacao:'S',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+
+  {id:mkId(),num:45,nome:'MATHEUS FRANCA DE QUEIROGA',         cargo:'PINTOR',                                salario:0,    status:'Ativo',   ajuda:0,   custo:0,     obs:'',
+   pcmso:{setor:'OFICINA',admissao:'2025-04-15',demissao:'',situacao:'S',sexo:'M'},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+];
+
+// ═══════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════
+let COLABS = [];
+const F = { colab:{q:'',st:''}, pcmso:{q:'',sit:''}, ferias:{q:''} };
+const SORTS = { colab:[1,1], pcmso:[1,1], ferias:[1,1] };
 const TODAY = new Date('2026-08-12');
 
-// ─── LOAD / SAVE ─────────────────────────────────────────────────────────────
-function loadData() {
-  ['colab','pcmso','ferias'].forEach(k => {
-    const saved = localStorage.getItem('tccar_'+k);
-    DATA[k] = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULTS[k]));
-  });
+// ═══════════════════════════════════════════════════════════════════
+// PERSIST — Google Sheets + localStorage como fallback
+// ═══════════════════════════════════════════════════════════════════
+const API_READY = API_URL && API_URL !== 'COLE_AQUI_A_URL_DO_APPS_SCRIPT';
+
+function showOverlay(msg) {
+  document.getElementById('loading-msg').textContent = msg || 'Carregando...';
+  document.getElementById('loading-overlay').classList.add('show');
 }
-function saveData(key) {
-  localStorage.setItem('tccar_'+key, JSON.stringify(DATA[key]));
-  const ind = document.getElementById('save-indicator');
-  ind.classList.add('show');
-  clearTimeout(window._saveTimer);
-  window._saveTimer = setTimeout(() => ind.classList.remove('show'), 2000);
+function hideOverlay() {
+  document.getElementById('loading-overlay').classList.remove('show');
 }
-function confirmReset() {
-  if (confirm('Restaurar todos os dados para o original? As edições serão perdidas.')) {
-    ['colab','pcmso','ferias'].forEach(k => localStorage.removeItem('tccar_'+k));
-    loadData();
+function showInd(cloud) {
+  const el = document.getElementById('save-ind');
+  el.classList.remove('warn');
+  if (!cloud) { el.textContent = '💾 Salvo localmente'; el.classList.add('warn'); }
+  else { el.textContent = '☁️ Salvo na nuvem'; }
+  el.classList.add('show');
+  clearTimeout(window._st);
+  window._st = setTimeout(() => { el.classList.remove('show','warn'); el.textContent='✓ Salvo'; }, 3000);
+}
+
+async function load() {
+  if (!API_READY) {
+    // sem API: usa localStorage ou defaults
+    const s = localStorage.getItem('tccar_v3');
+    COLABS = s ? JSON.parse(s) : JSON.parse(JSON.stringify(DEFAULT_COLABS));
     renderAll();
+    return;
+  }
+  showOverlay('Carregando dados da nuvem...');
+  try {
+    const r = await fetch(API_URL + '?t=' + Date.now());
+    const data = await r.json();
+    if (Array.isArray(data) && data.length > 0) {
+      COLABS = data;
+      localStorage.setItem('tccar_v3', JSON.stringify(COLABS)); // cache local
+    } else {
+      // planilha vazia: sobe os dados padrão
+      COLABS = JSON.parse(JSON.stringify(DEFAULT_COLABS));
+      await saveToCloud();
+    }
+  } catch(e) {
+    // offline: usa cache local
+    const s = localStorage.getItem('tccar_v3');
+    COLABS = s ? JSON.parse(s) : JSON.parse(JSON.stringify(DEFAULT_COLABS));
+  }
+  hideOverlay();
+  renderAll();
+}
+
+async function saveToCloud() {
+  try {
+    await fetch(API_URL, { method:'POST', body: JSON.stringify(COLABS) });
+    return true;
+  } catch(e) {
+    return false;
   }
 }
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
-function fmtMoney(v) {
+function save() {
+  localStorage.setItem('tccar_v3', JSON.stringify(COLABS)); // salva local imediatamente
+  if (!API_READY) { showInd(false); return; }
+  saveToCloud().then(ok => showInd(ok));
+}
+
+async function confirmReset() {
+  if (!confirm('Restaurar todos os dados para o original? Edições serão perdidas.')) return;
+  COLABS = JSON.parse(JSON.stringify(DEFAULT_COLABS));
+  localStorage.removeItem('tccar_v3');
+  if (API_READY) {
+    showOverlay('Restaurando...');
+    await saveToCloud();
+    hideOverlay();
+  }
+  renderAll();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════════
+function fmtM(v) {
   const n = parseFloat(v);
   if (!v || isNaN(n) || n === 0) return '—';
-  return 'R$ ' + n.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+  return 'R$ ' + n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
-function fmtDate(s) {
+function fmtD(s) {
   if (!s) return '—';
-  const parts = String(s).split('-');
-  if (parts.length === 3) return parts[2]+'/'+parts[1]+'/'+parts[0];
-  return s;
+  const p = String(s).split('-');
+  return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : s;
 }
-function parseNum(v) { return parseFloat(String(v).replace(',','.')) || 0; }
-function ce(tag, attrs, children) {
-  const el = document.createElement(tag);
-  if (attrs) Object.entries(attrs).forEach(([k,v]) => {
-    if (k === 'class') el.className = v;
-    else if (k.startsWith('on')) el[k] = v;
-    else el.setAttribute(k, v);
-  });
-  if (children) {
-    if (typeof children === 'string') el.innerHTML = children;
-    else children.forEach(c => c && el.appendChild(c));
-  }
-  return el;
-}
+function pn(v) { return parseFloat(String(v).replace(',','.')) || 0; }
 
-// Editable text td
-function editTd(val, placeholder, onchange, numOnly) {
+function etd(val, ph, cb, num) {
   const td = document.createElement('td');
   td.contentEditable = 'true';
-  td.setAttribute('data-placeholder', placeholder || '—');
-  if (numOnly) {
-    td.style.textAlign = 'right';
-    td.style.fontWeight = '600';
-    td.style.color = '#065f46';
-  }
-  td.textContent = val !== null && val !== undefined && val !== 0 ? String(val) : '';
-  td.addEventListener('blur', () => {
-    let v = td.textContent.trim();
-    if (numOnly) v = parseNum(v);
-    onchange(v);
-  });
-  td.addEventListener('keydown', e => {
-    if (e.key === 'Enter') { e.preventDefault(); td.blur(); }
-  });
+  td.setAttribute('data-ph', ph||'—');
+  if (num) { td.style.textAlign='right'; td.style.fontWeight='600'; td.style.color='#065f46'; }
+  td.textContent = (val!==null && val!==undefined && val!==0 && val!=='') ? String(val) : '';
+  td.addEventListener('blur', () => { let v=td.textContent.trim(); if(num) v=pn(v); cb(v); });
+  td.addEventListener('keydown', e => { if(e.key==='Enter'){e.preventDefault();td.blur();} });
   return td;
 }
-
-// Delete button td
-function delTd(onclick) {
-  const td = document.createElement('td');
-  const btn = document.createElement('button');
-  btn.className = 'btn-del';
-  btn.textContent = '✕';
-  btn.title = 'Remover linha';
-  btn.onclick = onclick;
-  td.appendChild(btn);
-  return td;
+function deltd(cb) {
+  const td=document.createElement('td');
+  const b=document.createElement('button');
+  b.className='btn-del'; b.textContent='✕'; b.title='Remover'; b.onclick=cb;
+  td.appendChild(b); return td;
 }
 
-// ─── SORT / FILTER ─────────────────────────────────────────────────────────
-function sortC(ds, col) {
-  const [c, d] = SORTS[ds];
-  SORTS[ds] = [col, c === col ? -d : 1];
-  render(ds);
+// ═══════════════════════════════════════════════════════════════════
+// SORT / FILTER
+// ═══════════════════════════════════════════════════════════════════
+function S(tab, col) {
+  const [c,d]=SORTS[tab];
+  SORTS[tab]=[col, c===col?-d:1];
+  render(tab);
 }
-function filterColab(v) { FILTERS.colab.search = v; render('colab'); }
-function filterColabStatus(v) { FILTERS.colab.status = v; render('colab'); }
-function filterPcmso(v) { FILTERS.pcmso.search = v; render('pcmso'); }
-function filterPcmsoSit(v) { FILTERS.pcmso.sit = v; render('pcmso'); }
-function filterFerias(v) { FILTERS.ferias.search = v; render('ferias'); }
 
-function getVisible(ds) {
-  let rows = DATA[ds].map((r, i) => ({ r, i }));
-  if (ds === 'colab') {
-    if (FILTERS.colab.status === '__hide_dem') rows = rows.filter(x => x.r[4] !== 'Demitido');
-  else if (FILTERS.colab.status) rows = rows.filter(x => x.r[4] === FILTERS.colab.status);
-    if (FILTERS.colab.search) {
-      const q = FILTERS.colab.search.toLowerCase();
-      rows = rows.filter(x => String(x.r[1]).toLowerCase().includes(q) || String(x.r[2]).toLowerCase().includes(q));
-    }
-  } else if (ds === 'pcmso') {
-    if (FILTERS.pcmso.sit) {
-      if (FILTERS.pcmso.sit === 'null') rows = rows.filter(x => !x.r[5]);
-      else rows = rows.filter(x => x.r[5] === FILTERS.pcmso.sit);
-    }
-    if (FILTERS.pcmso.search) {
-      const q = FILTERS.pcmso.search.toLowerCase();
-      rows = rows.filter(x => String(x.r[0]).toLowerCase().includes(q) || String(x.r[1]).toLowerCase().includes(q));
-    }
-  } else if (ds === 'ferias') {
-    if (FILTERS.ferias.search) {
-      const q = FILTERS.ferias.search.toLowerCase();
-      rows = rows.filter(x => String(x.r[0]).toLowerCase().includes(q));
-    }
+function getRows(tab) {
+  let rows = COLABS.map((c,i)=>({c,i}));
+
+  if (tab==='colab') {
+    if (F.colab.st==='__hide_dem') rows=rows.filter(x=>x.c.status!=='Demitido');
+    else if (F.colab.st) rows=rows.filter(x=>x.c.status===F.colab.st);
+    if (F.colab.q) { const q=F.colab.q.toLowerCase(); rows=rows.filter(x=>x.c.nome.toLowerCase().includes(q)||x.c.cargo.toLowerCase().includes(q)); }
+    const [col,dir]=SORTS.colab;
+    const keys=[null,'nome','cargo','salario','status','ajuda','custo','obs'];
+    rows.sort((a,b)=>{
+      if(a.c.status==='Demitido'&&b.c.status!=='Demitido') return 1;
+      if(a.c.status!=='Demitido'&&b.c.status==='Demitido') return -1;
+      const k=keys[col]; if(!k) return 0;
+      const av=a.c[k],bv=b.c[k];
+      if(av==null||av==='') return 1; if(bv==null||bv==='') return -1;
+      const an=parseFloat(av),bn=parseFloat(bv);
+      if(!isNaN(an)&&!isNaN(bn)) return dir*(an-bn);
+      return dir*String(av).localeCompare(String(bv));
+    });
   }
-  const [col, dir] = SORTS[ds];
-  rows.sort((a, b) => {
-    // demitidos always last (only in colab)
-    if (ds === 'colab') {
-      const ad = a.r[4] === 'Demitido', bd = b.r[4] === 'Demitido';
-      if (ad && !bd) return 1;
-      if (!ad && bd) return -1;
-    }
-    const av = a.r[col], bv = b.r[col];
-    if (av == null || av === '') return 1;
-    if (bv == null || bv === '') return -1;
-    const an = parseFloat(av), bn = parseFloat(bv);
-    if (!isNaN(an) && !isNaN(bn)) return dir * (an - bn);
-    return dir * (String(av).localeCompare(String(bv)));
-  });
+
+  if (tab==='pcmso') {
+    if (F.pcmso.sit) rows=rows.filter(x=>x.c.pcmso.situacao===F.pcmso.sit);
+    if (F.pcmso.q) { const q=F.pcmso.q.toLowerCase(); rows=rows.filter(x=>x.c.nome.toLowerCase().includes(q)||x.c.cargo.toLowerCase().includes(q)); }
+    const [col,dir]=SORTS.pcmso;
+    const keys=[null,'nome','cargo',null,'admissao','demissao'];
+    rows.sort((a,b)=>{
+      if(a.c.status==='Demitido'&&b.c.status!=='Demitido') return 1;
+      if(a.c.status!=='Demitido'&&b.c.status==='Demitido') return -1;
+      const k=keys[col]; if(!k) return 0;
+      const av=k==='admissao'||k==='demissao'?a.c.pcmso[k]:a.c[k];
+      const bv=k==='admissao'||k==='demissao'?b.c.pcmso[k]:b.c[k];
+      if(!av) return 1; if(!bv) return -1;
+      return dir*String(av).localeCompare(String(bv));
+    });
+  }
+
+  if (tab==='ferias') {
+    if (F.ferias.q) { const q=F.ferias.q.toLowerCase(); rows=rows.filter(x=>x.c.nome.toLowerCase().includes(q)); }
+    const [col,dir]=SORTS.ferias;
+    rows.sort((a,b)=>{
+      if(a.c.status==='Demitido'&&b.c.status!=='Demitido') return 1;
+      if(a.c.status!=='Demitido'&&b.c.status==='Demitido') return -1;
+      const fkeys=[null,'nome',null,null,'limite','data','dias','saldo'];
+      const k=fkeys[col]; if(!k) return 0;
+      const av=k==='limite'||k==='data'||k==='dias'||k==='saldo'?a.c.ferias[k]:a.c[k];
+      const bv=k==='limite'||k==='data'||k==='dias'||k==='saldo'?b.c.ferias[k]:b.c[k];
+      if(!av&&av!==0) return 1; if(!bv&&bv!==0) return -1;
+      const an=parseFloat(av),bn=parseFloat(bv);
+      if(!isNaN(an)&&!isNaN(bn)) return dir*(an-bn);
+      return dir*String(av).localeCompare(String(bv));
+    });
+  }
+
   return rows;
 }
 
-// ─── RENDER ALL ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════════
 function renderAll() { render('colab'); render('pcmso'); render('ferias'); }
-
-// ─── RENDER COLAB ────────────────────────────────────────────────────────────
-function render(ds) {
-  if (ds === 'colab') renderColab();
-  else if (ds === 'pcmso') renderPcmso();
+function render(tab) {
+  if(tab==='colab') renderColab();
+  else if(tab==='pcmso') renderPcmso();
   else renderFerias();
 }
 
 function renderColab() {
-  // KPIs
-  const all = DATA.colab;
-  const ativos = all.filter(r => r[4] === 'Ativo');
-  const afastados = all.filter(r => r[4] === 'Afastado');
-  const demitidos = all.filter(r => r[4] === 'Demitido');
-  const folha = ativos.reduce((s,r) => s + parseNum(r[3]), 0);
-  const custo = ativos.reduce((s,r) => s + parseNum(r[6]), 0);
-  const ajuda = ativos.reduce((s,r) => s + parseNum(r[5]), 0);
-  document.getElementById('k-ativos').textContent = ativos.length;
-  document.getElementById('k-afastados').textContent = afastados.length;
-  document.getElementById('k-demitidos').textContent = demitidos.length;
-  document.getElementById('k-folha').textContent = 'R$ ' + folha.toLocaleString('pt-BR');
-  document.getElementById('k-custo').textContent = 'R$ ' + custo.toLocaleString('pt-BR');
-  document.getElementById('k-ajuda').textContent = 'R$ ' + ajuda.toLocaleString('pt-BR');
+  const ativos=COLABS.filter(c=>c.status==='Ativo');
+  const afastados=COLABS.filter(c=>c.status==='Afastado');
+  const demitidos=COLABS.filter(c=>c.status==='Demitido');
+  document.getElementById('k-ativos').textContent=ativos.length;
+  document.getElementById('k-afastados').textContent=afastados.length;
+  document.getElementById('k-demitidos').textContent=demitidos.length;
+  document.getElementById('k-folha').textContent='R$ '+ativos.reduce((s,c)=>s+pn(c.salario),0).toLocaleString('pt-BR');
+  document.getElementById('k-custo').textContent='R$ '+ativos.reduce((s,c)=>s+pn(c.custo),0).toLocaleString('pt-BR');
+  document.getElementById('k-ajuda').textContent='R$ '+ativos.reduce((s,c)=>s+pn(c.ajuda),0).toLocaleString('pt-BR');
 
-  const visible = getVisible('colab');
-  document.getElementById('colab-count').textContent = visible.length + ' colaborador' + (visible.length !== 1 ? 'es' : '');
-  const tbody = document.getElementById('colab-body');
-  tbody.innerHTML = '';
+  const rows=getRows('colab');
+  document.getElementById('cnt-colab').textContent=rows.length+' colaborador'+(rows.length!==1?'es':'');
+  const tbody=document.getElementById('body-colab');
+  tbody.innerHTML='';
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="9" class="no-results">Nenhum resultado</td></tr>';return;}
 
-  if (!visible.length) {
-    tbody.innerHTML = '<tr><td colspan="9" class="no-results">Nenhum resultado</td></tr>';
-    return;
-  }
+  const SCYCLE=['Ativo','Afastado','Demitido'];
+  const SCLS={Ativo:'bg-green',Afastado:'bg-yellow',Demitido:'bg-gray'};
 
-  visible.forEach(({ r, i }) => {
-    const tr = document.createElement('tr');
-    if (r[4] === 'Demitido') tr.classList.add('demitido');
+  rows.forEach(({c,i})=>{
+    const tr=document.createElement('tr');
+    if(c.status==='Demitido') tr.classList.add('demitido');
 
-    // delete
-    tr.appendChild(delTd(() => { DATA.colab.splice(i, 1); saveData('colab'); renderColab(); }));
+    tr.appendChild(deltd(()=>{COLABS.splice(i,1);save();renderAll();}));
+    tr.appendChild(etd(c.num,'Nº',v=>{COLABS[i].num=v;save();},true));
+    tr.appendChild(etd(c.nome,'Nome',v=>{COLABS[i].nome=v.toUpperCase();save();renderAll();}));
+    tr.appendChild(etd(c.cargo,'Cargo',v=>{COLABS[i].cargo=v.toUpperCase();save();renderAll();}));
+    tr.appendChild(etd(c.salario||'','Salário',v=>{COLABS[i].salario=pn(v);save();renderColab();},true));
 
-    // nº
-    tr.appendChild(editTd(r[0], 'Nº', v => { DATA.colab[i][0] = v; saveData('colab'); }, true));
+    const std=document.createElement('td');
+    const sb=document.createElement('span');
+    sb.className='badge '+(SCLS[c.status]||'bg-gray');
+    sb.textContent=c.status||'Ativo';
+    sb.title='Clique para alternar';
+    sb.onclick=()=>{const idx=SCYCLE.indexOf(COLABS[i].status);COLABS[i].status=SCYCLE[(idx+1)%SCYCLE.length];save();renderAll();};
+    std.appendChild(sb); tr.appendChild(std);
 
-    // nome
-    tr.appendChild(editTd(r[1], 'Nome', v => { DATA.colab[i][1] = v.toUpperCase(); saveData('colab'); }));
-
-    // cargo
-    tr.appendChild(editTd(r[2], 'Cargo', v => { DATA.colab[i][2] = v.toUpperCase(); saveData('colab'); }));
-
-    // salário
-    tr.appendChild(editTd(r[3] || '', 'Salário', v => { DATA.colab[i][3] = parseNum(v); saveData('colab'); renderColab(); }, true));
-
-    // status badge toggle
-    const statusTd = document.createElement('td');
-    const STATUS_CYCLE = ['Ativo', 'Afastado', 'Demitido'];
-    const STATUS_CLS = { 'Ativo': 'bg-green', 'Afastado': 'bg-yellow', 'Demitido': 'bg-gray' };
-    const sts = r[4] || 'Ativo';
-    const sbadge = document.createElement('span');
-    sbadge.className = 'badge ' + (STATUS_CLS[sts] || 'bg-gray');
-    sbadge.textContent = sts;
-    sbadge.title = 'Clique para alternar';
-    sbadge.onclick = () => {
-      const idx = STATUS_CYCLE.indexOf(DATA.colab[i][4]);
-      DATA.colab[i][4] = STATUS_CYCLE[(idx + 1) % STATUS_CYCLE.length];
-      saveData('colab'); renderColab();
-    };
-    statusTd.appendChild(sbadge);
-    tr.appendChild(statusTd);
-
-    // ajuda custo
-    tr.appendChild(editTd(r[5] || '', 'Ajuda', v => { DATA.colab[i][5] = parseNum(v); saveData('colab'); renderColab(); }, true));
-
-    // custo total
-    tr.appendChild(editTd(r[6] || '', 'Custo', v => { DATA.colab[i][6] = parseNum(v); saveData('colab'); renderColab(); }, true));
-
-    // obs
-    const obsTd = editTd(r[7] || '', 'Observação', v => { DATA.colab[i][7] = v; saveData('colab'); });
-    obsTd.className = 'obs-cell';
-    tr.appendChild(obsTd);
-
+    tr.appendChild(etd(c.ajuda||'','Ajuda',v=>{COLABS[i].ajuda=pn(v);save();renderColab();},true));
+    tr.appendChild(etd(c.custo||'','Custo',v=>{COLABS[i].custo=pn(v);save();renderColab();},true));
+    const otd=etd(c.obs,'Observação',v=>{COLABS[i].obs=v;save();});
+    otd.className='obs-cell'; tr.appendChild(otd);
     tbody.appendChild(tr);
   });
 }
 
-// ─── RENDER PCMSO ───────────────────────────────────────────────────────────
 function renderPcmso() {
-  const all = DATA.pcmso;
-  const ativos = all.filter(r => r[5] === 'S').length;
-  const inat = all.filter(r => r[5] === 'N').length;
-  const pend = all.filter(r => !r[5]).length;
-  document.getElementById('k-p-ativos').textContent = ativos;
-  document.getElementById('k-p-inat').textContent = inat;
-  document.getElementById('k-p-pend').textContent = pend;
-  document.getElementById('k-p-total').textContent = all.length;
+  document.getElementById('k-p-at').textContent=COLABS.filter(c=>c.pcmso.situacao==='S').length;
+  document.getElementById('k-p-in').textContent=COLABS.filter(c=>c.pcmso.situacao==='N').length;
+  document.getElementById('k-p-pend').textContent=COLABS.filter(c=>!c.pcmso.situacao).length;
+  document.getElementById('k-p-tot').textContent=COLABS.length;
 
-  const visible = getVisible('pcmso');
-  document.getElementById('pcmso-count').textContent = visible.length + ' registro' + (visible.length !== 1 ? 's' : '');
-  const tbody = document.getElementById('pcmso-body');
-  tbody.innerHTML = '';
+  const rows=getRows('pcmso');
+  document.getElementById('cnt-pcmso').textContent=rows.length+' registro'+(rows.length!==1?'s':'');
+  const tbody=document.getElementById('body-pcmso');
+  tbody.innerHTML='';
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="8" class="no-results">Nenhum resultado</td></tr>';return;}
 
-  if (!visible.length) {
-    tbody.innerHTML = '<tr><td colspan="8" class="no-results">Nenhum resultado</td></tr>';
-    return;
-  }
+  const SITS=['S','N',''];
+  const SCLS2={S:['Ativo','bg-green'],N:['Desligado','bg-red'],'':[' Pendente','bg-yellow']};
+  const STCLS={Ativo:'bg-green',Afastado:'bg-yellow',Demitido:'bg-gray'};
 
-  const SITS = ['S', 'N', ''];
-  const SIT_LABELS = { 'S': ['Ativo', 'bg-green'], 'N': ['Desligado', 'bg-red'], '': ['Pendente', 'bg-yellow'] };
+  rows.forEach(({c,i})=>{
+    const tr=document.createElement('tr');
+    if(c.status==='Demitido') tr.classList.add('demitido');
 
-  visible.forEach(({ r, i }) => {
-    const tr = document.createElement('tr');
+    tr.appendChild(etd(c.nome,'Nome',v=>{COLABS[i].nome=v.toUpperCase();save();renderAll();}));
+    tr.appendChild(etd(c.cargo,'Cargo',v=>{COLABS[i].cargo=v.toUpperCase();save();renderAll();}));
 
-    tr.appendChild(delTd(() => { DATA.pcmso.splice(i, 1); saveData('pcmso'); renderPcmso(); }));
-    tr.appendChild(editTd(r[0], 'Nome', v => { DATA.pcmso[i][0] = v.toUpperCase(); saveData('pcmso'); }));
-    tr.appendChild(editTd(r[1], 'Cargo', v => { DATA.pcmso[i][1] = v.toUpperCase(); saveData('pcmso'); }));
-    tr.appendChild(editTd(r[2], 'Setor', v => { DATA.pcmso[i][2] = v.toUpperCase(); saveData('pcmso'); }));
-    tr.appendChild(editTd(r[3], 'AAAA-MM-DD', v => { DATA.pcmso[i][3] = v; saveData('pcmso'); }));
-    tr.appendChild(editTd(r[4], 'AAAA-MM-DD', v => { DATA.pcmso[i][4] = v; saveData('pcmso'); }));
+    const rhtd=document.createElement('td');
+    const rhb=document.createElement('span');
+    rhb.className='badge '+(STCLS[c.status]||'bg-gray');
+    rhb.textContent=c.status||'—'; rhb.style.cursor='default';
+    rhtd.appendChild(rhb); tr.appendChild(rhtd);
 
-    // situação badge cycle
-    const sitTd = document.createElement('td');
-    const sit = r[5] || '';
-    const [label, cls] = SIT_LABELS[sit] || ['Pendente', 'bg-yellow'];
-    const sbadge = document.createElement('span');
-    sbadge.className = 'badge ' + cls;
-    sbadge.textContent = label;
-    sbadge.title = 'Clique para alternar';
-    sbadge.onclick = () => {
-      const idx = SITS.indexOf(DATA.pcmso[i][5] || '');
-      DATA.pcmso[i][5] = SITS[(idx + 1) % SITS.length];
-      saveData('pcmso'); renderPcmso();
-    };
-    sitTd.appendChild(sbadge);
-    tr.appendChild(sitTd);
+    tr.appendChild(etd(c.pcmso.setor,'Setor',v=>{COLABS[i].pcmso.setor=v.toUpperCase();save();}));
+    tr.appendChild(etd(c.pcmso.admissao,'AAAA-MM-DD',v=>{COLABS[i].pcmso.admissao=v;save();}));
+    tr.appendChild(etd(c.pcmso.demissao,'AAAA-MM-DD',v=>{COLABS[i].pcmso.demissao=v;save();}));
 
-    // sexo badge cycle
-    const sexTd = document.createElement('td');
-    const sex = r[6] || 'M';
-    const sxbadge = document.createElement('span');
-    sxbadge.className = 'badge ' + (sex === 'F' ? 'bg-purple' : 'bg-blue');
-    sxbadge.textContent = sex;
-    sxbadge.title = 'Clique para alternar';
-    sxbadge.onclick = () => {
-      DATA.pcmso[i][6] = DATA.pcmso[i][6] === 'F' ? 'M' : 'F';
-      saveData('pcmso'); renderPcmso();
-    };
-    sexTd.appendChild(sxbadge);
-    tr.appendChild(sexTd);
+    const sitd=document.createElement('td');
+    const sit=c.pcmso.situacao||'';
+    const [slbl,scls]=SCLS2[sit]||['Pendente','bg-yellow'];
+    const sib=document.createElement('span');
+    sib.className='badge '+scls; sib.textContent=slbl; sib.title='Clique para alternar';
+    sib.onclick=()=>{const idx=SITS.indexOf(COLABS[i].pcmso.situacao||'');COLABS[i].pcmso.situacao=SITS[(idx+1)%SITS.length];save();renderPcmso();};
+    sitd.appendChild(sib); tr.appendChild(sitd);
+
+    const sxtd=document.createElement('td');
+    const sxb=document.createElement('span');
+    sxb.className='badge '+(c.pcmso.sexo==='F'?'bg-purple':'bg-blue');
+    sxb.textContent=c.pcmso.sexo||'M'; sxb.title='Clique para alternar';
+    sxb.onclick=()=>{COLABS[i].pcmso.sexo=COLABS[i].pcmso.sexo==='F'?'M':'F';save();renderPcmso();};
+    sxtd.appendChild(sxb); tr.appendChild(sxtd);
 
     tbody.appendChild(tr);
   });
 }
 
-// ─── RENDER FÉRIAS ──────────────────────────────────────────────────────────
 function renderFerias() {
-  const all = DATA.ferias;
-  const withDate = all.filter(r => r[2]).length;
-  const comSaldo = all.filter(r => parseNum(r[5]) > 0).length;
-  const totalDias = all.reduce((s,r) => s + parseNum(r[4]), 0);
-  const vencendo = all.filter(r => {
-    if (!r[2]) return false;
-    const diff = (new Date(r[2]) - TODAY) / 86400000;
-    return diff <= 90;
-  }).length;
-  document.getElementById('k-f-total').textContent = withDate;
-  document.getElementById('k-f-saldo').textContent = comSaldo;
-  document.getElementById('k-f-dias').textContent = totalDias;
-  document.getElementById('k-f-venc').textContent = vencendo;
+  const com=COLABS.filter(c=>c.ferias.limite||c.ferias.data).length;
+  const comSaldo=COLABS.filter(c=>pn(c.ferias.saldo)>0).length;
+  const totalDias=COLABS.reduce((s,c)=>s+pn(c.ferias.dias),0);
+  const venc=COLABS.filter(c=>{if(!c.ferias.limite)return false;return(new Date(c.ferias.limite)-TODAY)/86400000<=90;}).length;
+  document.getElementById('k-f-com').textContent=com;
+  document.getElementById('k-f-sal').textContent=comSaldo;
+  document.getElementById('k-f-dias').textContent=totalDias;
+  document.getElementById('k-f-venc').textContent=venc;
 
-  const visible = getVisible('ferias');
-  document.getElementById('ferias-count').textContent = visible.length + ' registro' + (visible.length !== 1 ? 's' : '');
-  const tbody = document.getElementById('ferias-body');
-  tbody.innerHTML = '';
+  const rows=getRows('ferias');
+  document.getElementById('cnt-ferias').textContent=rows.length+' registro'+(rows.length!==1?'s':'');
+  const tbody=document.getElementById('body-ferias');
+  tbody.innerHTML='';
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="9" class="no-results">Nenhum resultado</td></tr>';return;}
 
-  if (!visible.length) {
-    tbody.innerHTML = '<tr><td colspan="9" class="no-results">Nenhum resultado</td></tr>';
-    return;
-  }
+  const STCLS={Ativo:'bg-green',Afastado:'bg-yellow',Demitido:'bg-gray'};
 
-  visible.forEach(({ r, i }) => {
-    const tr = document.createElement('tr');
-    tr.appendChild(delTd(() => { DATA.ferias.splice(i, 1); saveData('ferias'); renderFerias(); }));
-    tr.appendChild(editTd(r[0], 'Nome', v => { DATA.ferias[i][0] = v.toUpperCase(); saveData('ferias'); }));
-    tr.appendChild(editTd(r[1], 'Período Aquisitivo', v => { DATA.ferias[i][1] = v; saveData('ferias'); }));
+  rows.forEach(({c,i})=>{
+    const tr=document.createElement('tr');
+    if(c.status==='Demitido') tr.classList.add('demitido');
 
-    // data limite com cor
-    const dlTd = editTd(r[2], 'AAAA-MM-DD', v => { DATA.ferias[i][2] = v; saveData('ferias'); renderFerias(); });
-    if (r[2]) {
-      const diff = (new Date(r[2]) - TODAY) / 86400000;
-      dlTd.className = diff < 0 ? 'venc-late' : diff <= 90 ? 'venc-warn' : 'venc-ok';
-      if (diff < 0) dlTd.title = 'Vencido!';
-      else if (diff <= 90) dlTd.title = 'Vence em ' + Math.round(diff) + ' dias';
-    }
-    tr.appendChild(dlTd);
+    tr.appendChild(etd(c.nome,'Nome',v=>{COLABS[i].nome=v.toUpperCase();save();renderAll();}));
 
-    tr.appendChild(editTd(r[3], 'AAAA-MM-DD', v => { DATA.ferias[i][3] = v; saveData('ferias'); }));
-    tr.appendChild(editTd(r[4], 'Dias', v => { DATA.ferias[i][4] = parseNum(v); saveData('ferias'); renderFerias(); }, true));
-    tr.appendChild(editTd(r[5], 'Saldo', v => { DATA.ferias[i][5] = parseNum(v); saveData('ferias'); renderFerias(); }, true));
+    const rhtd=document.createElement('td');
+    const rhb=document.createElement('span');
+    rhb.className='badge '+(STCLS[c.status]||'bg-gray');
+    rhb.textContent=c.status||'—'; rhb.style.cursor='default';
+    rhtd.appendChild(rhb); tr.appendChild(rhtd);
 
-    // situação automática
-    const sl = parseNum(r[5]);
-    const sitTd = document.createElement('td');
-    let sitBadge;
-    if (sl === 0) sitBadge = '<span class="badge bg-green">Concluído</span>';
-    else if (sl < 0) sitBadge = '<span class="badge bg-red">Adiantamento</span>';
-    else sitBadge = '<span class="badge bg-yellow">Saldo Aberto</span>';
-    sitTd.innerHTML = sitBadge;
-    tr.appendChild(sitTd);
+    tr.appendChild(etd(c.ferias.periodo,'Período',v=>{COLABS[i].ferias.periodo=v;save();}));
 
-    const obsTd = editTd(r[6], 'Observação', v => { DATA.ferias[i][6] = v; saveData('ferias'); });
-    obsTd.className = 'obs-cell';
-    tr.appendChild(obsTd);
+    const ltd=etd(c.ferias.limite,'AAAA-MM-DD',v=>{COLABS[i].ferias.limite=v;save();renderFerias();});
+    if(c.ferias.limite){const d=(new Date(c.ferias.limite)-TODAY)/86400000;ltd.className=d<0?'venc-late':d<=90?'venc-warn':'venc-ok';}
+    tr.appendChild(ltd);
+
+    tr.appendChild(etd(c.ferias.data,'AAAA-MM-DD',v=>{COLABS[i].ferias.data=v;save();}));
+    tr.appendChild(etd(c.ferias.dias||'','Dias',v=>{COLABS[i].ferias.dias=pn(v);save();renderFerias();},true));
+    tr.appendChild(etd(c.ferias.saldo!==0?c.ferias.saldo:'','Saldo',v=>{COLABS[i].ferias.saldo=pn(v);save();renderFerias();},true));
+
+    const sl=pn(c.ferias.saldo);
+    const sitd=document.createElement('td');
+    sitd.innerHTML=sl===0?'<span class="badge bg-green">Concluído</span>':sl<0?'<span class="badge bg-red">Adiantamento</span>':'<span class="badge bg-yellow">Saldo Aberto</span>';
+    tr.appendChild(sitd);
+
+    const otd=etd(c.ferias.obs,'Obs',v=>{COLABS[i].ferias.obs=v;save();});
+    otd.className='obs-cell'; tr.appendChild(otd);
 
     tbody.appendChild(tr);
   });
 }
 
-// ─── ADD ROW ─────────────────────────────────────────────────────────────────
-function addColabRow() {
-  DATA.colab.push([DATA.colab.length + 1, 'NOVO COLABORADOR', 'CARGO', 0, 'Ativo', 0, 0, '']);
-  saveData('colab'); renderColab();
-  setTimeout(() => {
-    const rows = document.getElementById('colab-body').querySelectorAll('tr');
-    const lastRow = rows[rows.length - 1];
-    if (lastRow) { const tds = lastRow.querySelectorAll('td[contenteditable]'); if(tds[1]) tds[1].focus(); }
-  }, 50);
-}
-function addPcmsoRow() {
-  DATA.pcmso.push(['NOVO FUNCIONARIO', '', 'OFICINA', '', '', '', 'M']);
-  saveData('pcmso'); renderPcmso();
-  setTimeout(() => {
-    const rows = document.getElementById('pcmso-body').querySelectorAll('tr');
-    const lastRow = rows[rows.length - 1];
-    if (lastRow) { const tds = lastRow.querySelectorAll('td[contenteditable]'); if(tds[0]) tds[0].focus(); }
-  }, 50);
-}
-function addFeriasRow() {
-  DATA.ferias.push(['NOVO FUNCIONARIO', '', '', '', 0, 0, '']);
-  saveData('ferias'); renderFerias();
-  setTimeout(() => {
-    const rows = document.getElementById('ferias-body').querySelectorAll('tr');
-    const lastRow = rows[rows.length - 1];
-    if (lastRow) { const tds = lastRow.querySelectorAll('td[contenteditable]'); if(tds[0]) tds[0].focus(); }
-  }, 50);
+// ═══════════════════════════════════════════════════════════════════
+// ADD
+// ═══════════════════════════════════════════════════════════════════
+function addColab() {
+  COLABS.push({
+    id:mkId(), num:COLABS.length+1,
+    nome:'NOVO COLABORADOR', cargo:'CARGO',
+    salario:0, status:'Ativo', ajuda:0, custo:0, obs:'',
+    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
+    ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}
+  });
+  save(); renderAll();
+  setTimeout(()=>{
+    const tds=document.getElementById('body-colab').lastElementChild?.querySelectorAll('td[contenteditable]');
+    if(tds&&tds[1]) tds[1].focus();
+  },60);
 }
 
-// ─── TAB ─────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════
+// TAB
+// ═══════════════════════════════════════════════════════════════════
 function showTab(tab) {
-  ['colaboradores','pcmso','ferias'].forEach((t, i) => {
-    document.querySelectorAll('.tab')[i].classList.toggle('active', t === tab);
-    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+  ['colab','pcmso','ferias'].forEach((t,i)=>{
+    document.querySelectorAll('.tab')[i].classList.toggle('active',t===tab);
+    document.getElementById('tab-'+t).classList.toggle('active',t===tab);
   });
 }
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-loadData();
-renderAll();
+load(); // renderAll() é chamado dentro do load()
 </script>
 </body>
 </html>
