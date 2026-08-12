@@ -200,6 +200,7 @@ tr.demitido:hover td { background: #f3f4f6 !important; }
   <p class="hint">💡 Clique em qualquer célula para editar · Data limite em laranja = vence em 90 dias · vermelho = vencido</p>
   <div class="toolbar">
     <input class="search" type="text" placeholder="🔍 Nome…" oninput="F.ferias.q=this.value;render('ferias')">
+    <button class="btn-add" style="background:#6366f1" onclick="importarFeriasPDF2608()" title="Importa os dados do PDF de Vencimentos de Férias 08/2026">📥 Importar PDF 08/2026</button>
     <span class="count-lbl" id="cnt-ferias"></span>
   </div>
   <div class="table-wrap">
@@ -233,11 +234,11 @@ function mkId() { return '_' + Math.random().toString(36).slice(2,9); }
 const DEFAULT_COLABS = [
   {id:mkId(),num:1, nome:'JULIA CORREIA SILVA',              cargo:'ANALISTA ADMINISTRATIVO E FINANCEIRO',   salario:3000, status:'Ativo',   ajuda:0,   custo:4500,  obs:'férias dia 19 e volta dia 12 -- 20 dias',
    pcmso:{setor:'ADMINISTRATIVO',admissao:'2021-09-01',demissao:'',situacao:'S',sexo:'F'},
-   ferias:{periodo:'01/09/2024 a 31/08/2025',limite:'2026-07-30',data:'2025-12-22',dias:20,saldo:19,obs:''}},
+   ferias:{periodo:'01/09/2024 a 31/08/2025',limite:'2026-08-20',data:'2025-12-22',dias:10,saldo:10,obs:'⚠️ URGENTE! 2° per.: 01/09/2025-31/08/2026 (30 dias)'}},
 
   {id:mkId(),num:2, nome:'MARCILIO SOUZA DOS SANTOS',         cargo:'COORDENADOR TÉCNICO DE QUALIDADE',       salario:4500, status:'Ativo',   ajuda:0,   custo:6750,  obs:'férias ok',
    pcmso:{setor:'OFICINA',admissao:'2021-07-01',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'01/07/2024 a 30/06/2025',limite:'2026-06-01',data:'2026-01-05',dias:30,saldo:0,obs:''}},
+   ferias:{periodo:'01/07/2025 a 30/06/2026',limite:'2027-07-15',data:'',dias:30,saldo:30,obs:''}},
 
   {id:mkId(),num:3, nome:'FELIPE NARDES OLIVEIRA',            cargo:'ESTOQUISTA',                             salario:2500, status:'Ativo',   ajuda:200, custo:3750,  obs:'férias 20 dias',
    pcmso:{setor:'OFICINA',admissao:'2023-10-10',demissao:'',situacao:'S',sexo:'M'},
@@ -249,15 +250,15 @@ const DEFAULT_COLABS = [
 
   {id:mkId(),num:5, nome:'MATHEUS PETILIO BORGES',             cargo:'FUNILEIRO',                             salario:4200, status:'Ativo',   ajuda:0,   custo:6300,  obs:'férias de 15 dias',
    pcmso:{setor:'OFICINA',admissao:'2023-08-18',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'18/08/2024 a 17/08/2025',limite:'2026-07-16',data:'2025-12-18',dias:20,saldo:0,obs:'Compramos 10 dias'}},
+   ferias:{periodo:'18/08/2025 a 17/08/2026',limite:'',data:'',dias:30,saldo:30,obs:''}},
 
   {id:mkId(),num:6, nome:'ROOSEVELT CHINA',                    cargo:'FUNILEIRO',                             salario:5000, status:'Ativo',   ajuda:100, custo:7500,  obs:'trabalha normal',
    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
-   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+   ferias:{periodo:'06/06/2025 a 05/06/2026',limite:'2027-05-06',data:'',dias:30,saldo:30,obs:''}},
 
   {id:mkId(),num:7, nome:'SEBASTIAO GONCALO DOS SANTOS',       cargo:'FUNILEIRO MONTADOR',                    salario:6008, status:'Ativo',   ajuda:0,   custo:9012,  obs:'',
    pcmso:{setor:'OFICINA',admissao:'2023-02-09',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+   ferias:{periodo:'09/02/2025 a 08/02/2026',limite:'2027-01-28',data:'',dias:10,saldo:10,obs:''}},
 
   {id:mkId(),num:8, nome:'CARLOS',                             cargo:'FUNILEIRO SEM REGISTRO',                salario:6000, status:'Ativo',   ajuda:0,   custo:9000,  obs:'pago 1500/semana',
    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
@@ -265,7 +266,7 @@ const DEFAULT_COLABS = [
 
   {id:mkId(),num:9, nome:'RODOLFO UZUM SIQUEIRA CORREIA',      cargo:'CONSULTOR DE RELACIONAMENTO E VENDAS',  salario:3500, status:'Ativo',   ajuda:0,   custo:5250,  obs:'férias de 15 dias',
    pcmso:{setor:'ADMINISTRATIVO',admissao:'2021-08-02',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'02/08/2024 a 01/08/2025',limite:'2026-07-02',data:'2025-12-22',dias:15,saldo:15,obs:''}},
+   ferias:{periodo:'02/08/2025 a 01/08/2026',limite:'',data:'',dias:30,saldo:30,obs:''}},
 
   {id:mkId(),num:10,nome:'ADRIANO',                            cargo:'ORÇAMENTISTA 2',                        salario:3000, status:'Ativo',   ajuda:150, custo:4500,  obs:'benefícios + 2000 por metas',
    pcmso:{setor:'ADMINISTRATIVO',admissao:'',demissao:'',situacao:'',sexo:'M'},
@@ -273,7 +274,7 @@ const DEFAULT_COLABS = [
 
   {id:mkId(),num:11,nome:'JOSÉ APARECIDO',                     cargo:'MECÂNICO',                              salario:3500, status:'Ativo',   ajuda:100, custo:5250,  obs:'deve 3 dias natal',
    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
-   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+   ferias:{periodo:'06/06/2025 a 05/06/2026',limite:'2027-05-06',data:'',dias:30,saldo:30,obs:''}},
 
   {id:mkId(),num:12,nome:'BRAULIO HENRIQUE',                   cargo:'MECÂNICO',                              salario:3200, status:'Ativo',   ajuda:0,   custo:4800,  obs:'montar caixa ferramentas',
    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
@@ -281,7 +282,7 @@ const DEFAULT_COLABS = [
 
   {id:mkId(),num:13,nome:'ERIC OLIVEIRA DA SILVA',             cargo:'TÉCNICO DE MONTAGEM E QUALIDADE',       salario:3216, status:'Ativo',   ajuda:200, custo:4824,  obs:'férias 15 dias',
    pcmso:{setor:'OFICINA',admissao:'2024-04-19',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'19/04/2024 a 18/04/2025',limite:'2026-04-02',data:'2025-12-18',dias:8,saldo:7,obs:'Tirou 7 dias; faltam 8'}},
+   ferias:{periodo:'19/04/2025 a 18/04/2026',limite:'2027-03-18',data:'',dias:30,saldo:30,obs:''}},
 
   {id:mkId(),num:14,nome:'WASHINGTON SILVA GERMANO FILHO',     cargo:'MONTADOR',                              salario:3700, status:'Ativo',   ajuda:0,   custo:5550,  obs:'talvez férias 6 jan',
    pcmso:{setor:'OFICINA',admissao:'2023-10-17',demissao:'',situacao:'S',sexo:'M'},
@@ -293,11 +294,11 @@ const DEFAULT_COLABS = [
 
   {id:mkId(),num:16,nome:'GABRIEL ALBUQUERQUE SILVA',          cargo:'MONTADOR',                              salario:3000, status:'Ativo',   ajuda:100, custo:4500,  obs:'',
    pcmso:{setor:'OFICINA',admissao:'2021-11-11',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'11/11/2024 a 10/11/2025',limite:'2026-10-08',data:'2025-12-18',dias:15,saldo:15,obs:''}},
+   ferias:{periodo:'11/11/2024 a 10/11/2025',limite:'2026-10-27',data:'',dias:15,saldo:15,obs:''}},
 
   {id:mkId(),num:17,nome:'VALDOMIRO RICARDO DA SILVA FILHO',   cargo:'MONTADOR 2',                            salario:3216, status:'Ativo',   ajuda:0,   custo:4824,  obs:'30 dias férias',
    pcmso:{setor:'OFICINA',admissao:'2022-06-20',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'20/06/2024 a 19/06/2025',limite:'2026-05-21',data:'2025-12-18',dias:30,saldo:0,obs:''}},
+   ferias:{periodo:'20/06/2025 a 19/06/2026',limite:'2027-05-20',data:'',dias:30,saldo:30,obs:''}},
 
   {id:mkId(),num:18,nome:'CRISTOPHER',                         cargo:'MONTADOR',                              salario:2800, status:'Ativo',   ajuda:100, custo:4200,  obs:'trabalha normal',
    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
@@ -305,7 +306,7 @@ const DEFAULT_COLABS = [
 
   {id:mkId(),num:19,nome:'TIAGO HIDEKI YOGUI',                 cargo:'ORÇAMENTISTA TÉCNICO',                  salario:3500, status:'Ativo',   ajuda:200, custo:5250,  obs:'',
    pcmso:{setor:'ADMINISTRATIVO',admissao:'2022-11-10',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'10/11/2024 a 09/11/2025',limite:'2026-10-08',data:'2026-10-05',dias:20,saldo:0,obs:'Compramos 10 dias'}},
+   ferias:{periodo:'10/11/2024 a 09/11/2025',limite:'2026-10-21',data:'',dias:20,saldo:20,obs:''}},
 
   {id:mkId(),num:20,nome:'IGOR',                               cargo:'CHEFE DE OFICINA',                      salario:6800, status:'Ativo',   ajuda:0,   custo:10200, obs:'meta 12k total',
    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
@@ -321,7 +322,7 @@ const DEFAULT_COLABS = [
 
   {id:mkId(),num:23,nome:'JACKSON',                            cargo:'PINTOR',                                salario:3500, status:'Ativo',   ajuda:100, custo:5250,  obs:'férias 15 dias',
    pcmso:{setor:'OFICINA',admissao:'2025-04-15',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'',limite:'',data:'2025-12-18',dias:15,saldo:-15,obs:'Adiantamento'}},
+   ferias:{periodo:'15/04/2025 a 14/04/2026',limite:'2027-03-31',data:'',dias:15,saldo:15,obs:''}},
 
   {id:mkId(),num:24,nome:'JADSON',                             cargo:'PINTOR',                                salario:6000, status:'Ativo',   ajuda:100, custo:9000,  obs:'',
    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
@@ -341,7 +342,7 @@ const DEFAULT_COLABS = [
 
   {id:mkId(),num:28,nome:'ANTONIO TONINHO',                    cargo:'PINTOR',                                salario:4600, status:'Ativo',   ajuda:0,   custo:6900,  obs:'férias 15 dias',
    pcmso:{setor:'OFICINA',admissao:'2022-04-01',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'01/04/2024 a 31/03/2025',limite:'2026-03-17',data:'2025-12-18',dias:15,saldo:0,obs:''}},
+   ferias:{periodo:'18/07/2025 a 17/07/2026',limite:'2027-06-17',data:'',dias:30,saldo:30,obs:''}},
 
   {id:mkId(),num:29,nome:'ALANA',                              cargo:'PREPARADORA',                           salario:2800, status:'Ativo',   ajuda:100, custo:4200,  obs:'receber 4000 total',
    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'F'},
@@ -373,15 +374,15 @@ const DEFAULT_COLABS = [
 
   {id:mkId(),num:37,nome:'JOAO MATHEUS DA SILVA SERAFIM',      cargo:'CONTROLADOR DE PÁTIO E OPERAÇÕES',      salario:3000, status:'Ativo',   ajuda:0,   custo:4500,  obs:'tirar 5 dias e vender restante',
    pcmso:{setor:'ADMINISTRATIVO',admissao:'2023-03-27',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'27/03/2024 a 26/03/2025',limite:'2026-02-25',data:'2026-02-09',dias:20,saldo:0,obs:'Compramos 10 dias'}},
+   ferias:{periodo:'27/03/2025 a 26/03/2026',limite:'2027-02-25',data:'',dias:30,saldo:30,obs:''}},
 
   {id:mkId(),num:38,nome:'BRUNO HENRIQUE FELIZARDO DOS SANTOS',cargo:'PINTOR',                                salario:0,    status:'Ativo',   ajuda:0,   custo:0,     obs:'',
    pcmso:{setor:'OFICINA',admissao:'2023-04-25',demissao:'',situacao:'S',sexo:'M'},
    ferias:{periodo:'25/04/2023 a 24/04/2024',limite:'2026-05-18',data:'2025-12-18',dias:15,saldo:0,obs:''}},
 
   {id:mkId(),num:39,nome:'MATHEUS RUAS',                       cargo:'PINTOR',                                salario:0,    status:'Ativo',   ajuda:0,   custo:0,     obs:'',
-   pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
-   ferias:{periodo:'',limite:'',data:'2025-12-18',dias:15,saldo:-15,obs:'Adiantamento'}},
+   pcmso:{setor:'OFICINA',admissao:'2022-07-18',demissao:'',situacao:'S',sexo:'M'},
+   ferias:{periodo:'18/07/2025 a 17/07/2026',limite:'2027-07-01',data:'',dias:15,saldo:15,obs:''}},
 
   {id:mkId(),num:40,nome:'ALISSON OLIVEIRA DOS SANTOS',        cargo:'PINTOR',                                salario:0,    status:'Ativo',   ajuda:0,   custo:0,     obs:'',
    pcmso:{setor:'OFICINA',admissao:'2025-04-15',demissao:'',situacao:'S',sexo:'M'},
@@ -624,6 +625,7 @@ function renderColab() {
 
   rows.forEach(({c,i})=>{
     const tr=document.createElement('tr');
+    tr.setAttribute('data-id', c.id);
     if(c.status==='Demitido') tr.classList.add('demitido');
 
     tr.appendChild(deltd(()=>{COLABS.splice(i,1);save();renderAll();}));
@@ -753,11 +755,45 @@ function renderFerias() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// IMPORTAR FÉRIAS PDF 08/2026
+// ═══════════════════════════════════════════════════════════════════
+function importarFeriasPDF2608() {
+  const PDF = [
+    {nome:'JULIA CORREIA SILVA',       periodo:'01/09/2024 a 31/08/2025', limite:'2026-08-20', dias:10,  saldo:10,  obs:'⚠️ URGENTE! 2° per.: 01/09/2025-31/08/2026 (30 dias)'},
+    {nome:'TIAGO HIDEKI YOGUI',        periodo:'10/11/2024 a 09/11/2025', limite:'2026-10-21', dias:20,  saldo:20,  obs:''},
+    {nome:'GABRIEL ALBUQUERQUE SILVA', periodo:'11/11/2024 a 10/11/2025', limite:'2026-10-27', dias:15,  saldo:15,  obs:''},
+    {nome:'SEBASTIAO GONCALO DOS SANTOS', periodo:'09/02/2025 a 08/02/2026', limite:'2027-01-28', dias:10, saldo:10, obs:''},
+    {nome:'JOAO MATHEUS DA SILVA SERAFIM', periodo:'27/03/2025 a 26/03/2026', limite:'2027-02-25', dias:30, saldo:30, obs:''},
+    {nome:'JACKSON',                   periodo:'15/04/2025 a 14/04/2026', limite:'2027-03-31', dias:15,  saldo:15,  obs:''},
+    {nome:'ERIC OLIVEIRA DA SILVA',    periodo:'19/04/2025 a 18/04/2026', limite:'2027-03-18', dias:30,  saldo:30,  obs:''},
+    {nome:'ROOSEVELT CHINA',           periodo:'06/06/2025 a 05/06/2026', limite:'2027-05-06', dias:30,  saldo:30,  obs:''},
+    {nome:'JOSÉ APARECIDO',            periodo:'06/06/2025 a 05/06/2026', limite:'2027-05-06', dias:30,  saldo:30,  obs:''},
+    {nome:'VALDOMIRO RICARDO DA SILVA FILHO', periodo:'20/06/2025 a 19/06/2026', limite:'2027-05-20', dias:30, saldo:30, obs:''},
+    {nome:'MARCILIO SOUZA DOS SANTOS', periodo:'01/07/2025 a 30/06/2026', limite:'2027-07-15', dias:30,  saldo:30,  obs:''},
+    {nome:'ANTONIO TONINHO',           periodo:'18/07/2025 a 17/07/2026', limite:'2027-06-17', dias:30,  saldo:30,  obs:''},
+    {nome:'MATHEUS RUAS',              periodo:'18/07/2025 a 17/07/2026', limite:'2027-07-01', dias:15,  saldo:15,  obs:''},
+    {nome:'RODOLFO UZUM SIQUEIRA CORREIA', periodo:'02/08/2025 a 01/08/2026', limite:'', dias:30, saldo:30, obs:''},
+    {nome:'MATHEUS PETILIO BORGES',    periodo:'18/08/2025 a 17/08/2026', limite:'',           dias:30,  saldo:30,  obs:''},
+  ];
+  const norm = s => s.toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+  let atualizados = 0;
+  PDF.forEach(pf => {
+    const idx = COLABS.findIndex(c => norm(c.nome) === norm(pf.nome));
+    if (idx >= 0) {
+      COLABS[idx].ferias = {periodo:pf.periodo, limite:pf.limite, data:COLABS[idx].ferias.data||'', dias:pf.dias, saldo:pf.saldo, obs:pf.obs};
+      atualizados++;
+    }
+  });
+  save(); renderAll();
+  alert(`✅ ${atualizados} colaboradores atualizados com dados do PDF 08/2026!\nOs dados foram salvos no Google Sheets.`);
+}
+
 // ADD
 // ═══════════════════════════════════════════════════════════════════
 function addColab() {
+  const newId = mkId();
   COLABS.push({
-    id:mkId(), num:COLABS.length+1,
+    id:newId, num:COLABS.length+1,
     nome:'NOVO COLABORADOR', cargo:'CARGO',
     salario:0, status:'Ativo', ajuda:0, custo:0, obs:'',
     pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
@@ -765,7 +801,8 @@ function addColab() {
   });
   save(); renderAll();
   setTimeout(()=>{
-    const tds=document.getElementById('body-colab').lastElementChild?.querySelectorAll('td[contenteditable]');
+    const row = document.querySelector(`[data-id="${newId}"]`);
+    const tds = row?.querySelectorAll('td[contenteditable]');
     if(tds&&tds[1]) tds[1].focus();
   },60);
 }
