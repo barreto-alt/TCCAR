@@ -265,6 +265,7 @@ tr.demitido:hover td { background: #f3f4f6 !important; }
   <p class="hint">💡 Clique em qualquer célula para editar tamanhos · Clique no badge de EPI para marcar como entregue</p>
   <div class="toolbar">
     <input class="search" type="text" placeholder="🔍 Nome…" oninput="F.uniformes.q=this.value;render('uniformes')">
+    <button class="btn-add" style="background:#6366f1" onclick="importarUniformesChat()">📥 Importar tamanhos do WhatsApp</button>
     <span class="count-lbl" id="cnt-uniformes"></span>
   </div>
   <div class="table-wrap">
@@ -1071,6 +1072,55 @@ function addColab() {
 // ═══════════════════════════════════════════════════════════════════
 // TAB
 // ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
+// IMPORTAR UNIFORMES DO WHATSAPP
+// ═══════════════════════════════════════════════════════════════════
+function importarUniformesChat(){
+  const DADOS = [
+    {num:2,  calca:'G',  camisa:'GG', bota:''},
+    {num:3,  calca:'M',  camisa:'M',  bota:'38'},
+    {num:5,  calca:'M',  camisa:'M',  bota:'42'},
+    {num:6,  calca:'GG', camisa:'GG', bota:'43'},
+    {num:7,  calca:'GG', camisa:'GG', bota:''},
+    {num:11, calca:'M',  camisa:'G',  bota:'40'},
+    {num:13, calca:'G',  camisa:'G',  bota:''},
+    {num:14, calca:'G',  camisa:'G',  bota:'41'},
+    {num:15, calca:'M',  camisa:'M',  bota:''},
+    {num:16, calca:'P',  camisa:'M',  bota:'41'},
+    {num:17, calca:'G',  camisa:'G',  bota:'42'},
+    {num:18, calca:'GG', camisa:'G',  bota:'42'},
+    {num:19, calca:'M',  camisa:'M',  bota:''},
+    {num:23, calca:'G',  camisa:'G',  bota:'43'},
+    {num:24, calca:'G',  camisa:'G',  bota:''},
+    {num:25, calca:'P',  camisa:'P',  bota:'40'},
+    {num:28, calca:'G',  camisa:'G',  bota:'41'},
+    {num:31, calca:'M',  camisa:'GG', bota:'42'},
+    {num:32, calca:'G',  camisa:'',   bota:''},
+    {num:33, calca:'',   camisa:'',   bota:'40'},
+    {num:34, calca:'G',  camisa:'G',  bota:'40'},
+    {num:35, calca:'M',  camisa:'M',  bota:'39'},
+    {num:38, calca:'M',  camisa:'M',  bota:'42'},
+    {num:39, calca:'M',  camisa:'M',  bota:'39'},
+    {num:40, calca:'G',  camisa:'G',  bota:'43'},
+    {num:42, calca:'G',  camisa:'G',  bota:'43'},
+    {num:43, calca:'G',  camisa:'G',  bota:''},
+    {num:44, calca:'',   camisa:'GG', bota:'42'},
+  ];
+  let atualizados=0;
+  DADOS.forEach(d=>{
+    const idx=COLABS.findIndex(c=>c.num===d.num);
+    if(idx>=0){
+      if(!COLABS[idx].uniformes) COLABS[idx].uniformes={calca:'',camisa:'',bota:'',oculos:false,luva:false,abafador:false};
+      if(d.calca) COLABS[idx].uniformes.calca=d.calca;
+      if(d.camisa) COLABS[idx].uniformes.camisa=d.camisa;
+      if(d.bota) COLABS[idx].uniformes.bota=d.bota;
+      atualizados++;
+    }
+  });
+  save(); renderUniformes();
+  alert(`✅ ${atualizados} colaboradores atualizados com tamanhos do WhatsApp!`);
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // FATURAMENTO DATA
 // ═══════════════════════════════════════════════════════════════════
