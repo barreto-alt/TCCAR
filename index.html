@@ -144,6 +144,7 @@ tr.demitido:hover td { background: #f3f4f6 !important; }
   <div class="tab" onclick="showTab('uniformes')">👕 Uniformes</div>
   <div class="tab" onclick="showTab('faturamento')">💰 Faturamento</div>
   <div class="tab" onclick="showTab('financeiro')">📊 Financeiro</div>
+  <div class="tab" onclick="showTab('saldos')">🏦 Saldos</div>
 </div>
 
 <!-- COLABORADORES -->
@@ -329,6 +330,65 @@ tr.demitido:hover td { background: #f3f4f6 !important; }
         <th style="text-align:right">2026</th><th style="text-align:right">▲</th>
       </tr></thead>
       <tbody id="body-fat-hist"></tbody>
+    </table>
+  </div>
+
+  <div class="section-title" style="margin-top:24px">Volume de carros atendidos — 2026</div>
+  <div class="kpi-row" style="margin-bottom:16px">
+    <div class="kpi green"><div class="kpi-val">951</div><div class="kpi-label">Total carros (Jan–Ago)</div></div>
+    <div class="kpi blue"><div class="kpi-val">119</div><div class="kpi-label">Média mensal</div></div>
+    <div class="kpi purple"><div class="kpi-val">627</div><div class="kpi-label">Seguro (66%)</div></div>
+    <div class="kpi orange"><div class="kpi-val">234</div><div class="kpi-label">Particular (34% excl. jan)</div></div>
+  </div>
+  <div class="table-wrap" style="padding:16px;margin-bottom:20px">
+    <div style="position:relative;width:100%;height:260px">
+      <canvas id="chart-carros" role="img" aria-label="Carros atendidos por mês em 2026, seguro e particular"></canvas>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Mês</th>
+        <th style="text-align:right">🛡️ Seguro</th>
+        <th style="text-align:right">🚗 Particular</th>
+        <th style="text-align:right">Total</th>
+        <th style="text-align:right">% Seguro</th>
+      </tr></thead>
+      <tbody id="body-carros"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SALDOS -->
+<div id="tab-saldos" class="content">
+  <div class="kpi-row">
+    <div class="kpi blue"><div class="kpi-val" id="ks-total">—</div><div class="kpi-label">Saldo total (último)</div></div>
+    <div class="kpi green"><div class="kpi-val" id="ks-inv">—</div><div class="kpi-label">Investimentos</div></div>
+    <div class="kpi orange"><div class="kpi-val" id="ks-cc">—</div><div class="kpi-label">Contas correntes</div></div>
+    <div class="kpi" id="ks-var-card"><div class="kpi-val" id="ks-var">—</div><div class="kpi-label">Variação vs anterior</div></div>
+  </div>
+
+  <div class="section-title">Evolução do saldo total</div>
+  <div class="table-wrap" style="padding:16px;margin-bottom:20px">
+    <div style="position:relative;width:100%;height:280px">
+      <canvas id="chart-saldos" role="img" aria-label="Linha de saldo total ao longo do tempo"></canvas>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:20px">Detalhamento por data</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Data</th>
+        <th style="text-align:right">Bradesco CC</th>
+        <th style="text-align:right">SICOOB CC</th>
+        <th style="text-align:right">Itaú CC</th>
+        <th style="text-align:right">Total Correntes</th>
+        <th style="text-align:right">Investimentos</th>
+        <th style="text-align:right;font-weight:800">Total Geral</th>
+        <th style="text-align:right">Variação</th>
+      </tr></thead>
+      <tbody id="body-saldos"></tbody>
     </table>
   </div>
 </div>
@@ -1136,7 +1196,12 @@ const FAT_HIST = {
   '2025':[467081.85,524922.12,505485.00,501352.00,524344.00,506605.79,584296.68,574990.56,611880.87,654398.84,650953.20,618529.81],
   '2026':[573151.20,662129.13,696308.64,734603.64,690508.53,735906.33,720608.46,642610.12,null,null,null,null]
 };
-let _chartAnos=null, _chart2026=null;
+const FAT_CARROS = {
+  seguro:   [63,97,94,110,88,79,93,93],
+  particular:[63,12,38, 27,24,24,21,25],
+  totais:   [126,109,132,137,112,103,114,118]
+};
+let _chartAnos=null, _chart2026=null, _chartCarros=null;
 
 function brl(v){if(v==null)return'—';return'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function brlk(v){if(v==null)return'—';if(v>=1e6)return'R$ '+(v/1e6).toFixed(2).replace('.',',')+'M';return'R$ '+(v/1e3).toFixed(0)+'k';}
@@ -1204,6 +1269,107 @@ function renderFaturamento(){
         {label:'Produtos',data:FAT_2026.produtos,backgroundColor:'#378ADD',stack:'s'}
       ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{stacked:true,ticks:{callback:v=>brlk(v)},grid:{color:'#e0e4ef'}},x:{stacked:true,grid:{display:false}}}}});
     }
+    // Tabela carros
+    const tbc=document.getElementById('body-carros');
+    if(tbc){
+      tbc.innerHTML='';
+      FAT_CARROS.totais.forEach((tot,i)=>{
+        const s=FAT_CARROS.seguro[i],p=FAT_CARROS.particular[i];
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td><b>${FAT_MESES[i]}</b></td>
+          <td style="text-align:right">${s}</td>
+          <td style="text-align:right">${p}</td>
+          <td style="text-align:right;font-weight:600">${tot}</td>
+          <td style="text-align:right;color:#10b981">${((s/tot)*100).toFixed(0)}%</td>`;
+        tbc.appendChild(tr);
+      });
+      const tTot=FAT_CARROS.totais.reduce((a,b)=>a+b,0);
+      const tSeg=FAT_CARROS.seguro.reduce((a,b)=>a+b,0);
+      const tPar=FAT_CARROS.particular.reduce((a,b)=>a+b,0);
+      const tfr=document.createElement('tr');
+      tfr.style.fontWeight='700';tfr.style.background='#f8faff';
+      tfr.innerHTML=`<td>Total</td><td style="text-align:right">${tSeg}</td><td style="text-align:right">${tPar}</td><td style="text-align:right">${tTot}</td><td style="text-align:right;color:#10b981">${((tSeg/tTot)*100).toFixed(0)}%</td>`;
+      tbc.appendChild(tfr);
+    }
+    // Chart carros
+    const c3=document.getElementById('chart-carros');
+    if(c3&&c3.offsetParent!==null){
+      if(_chartCarros)_chartCarros.destroy();
+      _chartCarros=new Chart(c3,{type:'bar',data:{labels:FAT_MESES.slice(0,8),datasets:[
+        {label:'Seguro',data:FAT_CARROS.seguro,backgroundColor:'#185FA5',stack:'c'},
+        {label:'Particular',data:FAT_CARROS.particular,backgroundColor:'#1D9E75',stack:'c'}
+      ]},options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:true,position:'top',labels:{boxWidth:12,font:{size:11}}}},
+        scales:{y:{stacked:true,grid:{color:'#e0e4ef'},ticks:{stepSize:20}},x:{stacked:true,grid:{display:false}}}}});
+    }
+  },50);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// SALDOS DATA
+// ═══════════════════════════════════════════════════════════════════
+const SALDOS = [
+  {data:'04/dez/25', bradesco:49864.01, sicoob:14018.40, itau:66278.79, cc:130161.20, inv:200324.00, total:330485.20},
+  {data:'16/dez/25', bradesco:37633.49, sicoob:8138.10,  itau:66278.79, cc:112050.38, inv:201191.84, total:313242.22},
+  {data:'15/jan/26', bradesco:27023.89, sicoob:3294.30,  itau:0,         cc:30318.19,  inv:404040.92, total:434359.11},
+  {data:'05/fev/26', bradesco:81179.94, sicoob:39643.00, itau:0,         cc:120822.94, inv:404040.92, total:524863.86},
+  {data:'26/fev/26', bradesco:38816.00, sicoob:37334.37, itau:6363.37,   cc:82513.74,  inv:428976.00, total:511489.74},
+  {data:'12/mar/26', bradesco:14470.00, sicoob:26533.91, itau:6363.37,   cc:47367.28,  inv:420094.00, total:467461.28},
+  {data:'26/mar/26', bradesco:14404.60, sicoob:23416.08, itau:6363.37,   cc:44184.05,  inv:422079.76, total:466263.81},
+  {data:'16/abr/26', bradesco:86023.79, sicoob:14064.73, itau:12391.43,  cc:112479.95, inv:408639.07, total:521119.02},
+  {data:'23/abr/26', bradesco:36107.21, sicoob:8889.58,  itau:12391.43,  cc:57388.22,  inv:404086.00, total:461474.22},
+  {data:'05/mai/26', bradesco:79114.01, sicoob:16205.09, itau:18756.23,  cc:114075.33, inv:390759.47, total:504834.80},
+  {data:'10/jun/26', bradesco:15151.54, sicoob:25361.99, itau:42342.92,  cc:82856.45,  inv:477872.71, total:560729.16},
+  {data:'16/jul/26', bradesco:15174.00, sicoob:31067.00, itau:42345.00,  cc:88586.00,  inv:429251.82, total:517837.82},
+  {data:'12/ago/26', bradesco:10052.00, sicoob:7552.00,  itau:38265.00,  cc:55869.00,  inv:372633.09, total:428502.09},
+];
+let _chartSaldos=null;
+
+function renderSaldos(){
+  const ultimo=SALDOS[SALDOS.length-1];
+  const penult=SALDOS[SALDOS.length-2];
+  const variacao=ultimo.total-penult.total;
+  document.getElementById('ks-total').textContent=brlk(ultimo.total);
+  document.getElementById('ks-inv').textContent=brlk(ultimo.inv);
+  document.getElementById('ks-cc').textContent=brlk(ultimo.cc);
+  document.getElementById('ks-var').textContent=(variacao<0?'–':'+')+''+brlk(Math.abs(variacao));
+  document.getElementById('ks-var').style.color=variacao<0?'#ef4444':'#10b981';
+  document.getElementById('ks-var-card').style.borderLeftColor=variacao<0?'#ef4444':'#10b981';
+
+  // Tabela
+  const tb=document.getElementById('body-saldos');
+  tb.innerHTML='';
+  SALDOS.forEach((s,i)=>{
+    const var_=i>0?s.total-SALDOS[i-1].total:null;
+    const isNew=s.data.includes('/26');
+    const tr=document.createElement('tr');
+    if(!isNew)tr.style.opacity='0.7';
+    tr.innerHTML=`<td><b>${s.data}</b></td>
+      <td style="text-align:right">${brl(s.bradesco)}</td>
+      <td style="text-align:right">${brl(s.sicoob)}</td>
+      <td style="text-align:right">${s.itau?brl(s.itau):'—'}</td>
+      <td style="text-align:right;font-weight:600">${brl(s.cc)}</td>
+      <td style="text-align:right">${brl(s.inv)}</td>
+      <td style="text-align:right;font-weight:800">${brl(s.total)}</td>
+      <td style="text-align:right;font-size:.8rem;color:${var_==null?'#9ca3af':var_<0?'#ef4444':'#10b981'}">${var_==null?'—':(var_<0?'–':'+')+brl(Math.abs(var_))}</td>`;
+    tb.appendChild(tr);
+  });
+
+  // Chart
+  setTimeout(()=>{
+    const c=document.getElementById('chart-saldos');
+    if(!c||c.offsetParent===null)return;
+    if(_chartSaldos)_chartSaldos.destroy();
+    _chartSaldos=new Chart(c,{type:'line',data:{
+      labels:SALDOS.map(s=>s.data),
+      datasets:[
+        {label:'Investimentos',data:SALDOS.map(s=>s.inv),backgroundColor:'rgba(29,158,117,.15)',borderColor:'#1D9E75',borderWidth:2,fill:true,tension:.3,pointRadius:4},
+        {label:'Correntes',data:SALDOS.map(s=>s.cc),backgroundColor:'rgba(55,138,221,.15)',borderColor:'#378ADD',borderWidth:2,fill:true,tension:.3,pointRadius:4},
+        {label:'Total',data:SALDOS.map(s=>s.total),borderColor:'#1a1a2e',borderWidth:2.5,tension:.3,pointRadius:4,fill:false},
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'top',labels:{boxWidth:12,font:{size:11}}}},
+      scales:{y:{ticks:{callback:v=>brlk(v)},grid:{color:'#e0e4ef'}},x:{grid:{display:false},ticks:{font:{size:10},maxRotation:45}}}}});
   },50);
 }
 
@@ -1385,12 +1551,13 @@ function renderFinanceiro(){
 }
 
 function showTab(tab) {
-  ['colab','pcmso','ferias','uniformes','faturamento','financeiro'].forEach((t,i)=>{
+  ['colab','pcmso','ferias','uniformes','faturamento','financeiro','saldos'].forEach((t,i)=>{
     document.querySelectorAll('.tab')[i].classList.toggle('active',t===tab);
     document.getElementById('tab-'+t).classList.toggle('active',t===tab);
   });
   if(tab==='faturamento') renderFaturamento();
   if(tab==='financeiro') renderFinanceiro();
+  if(tab==='saldos') renderSaldos();
 }
 
 load(); // renderAll() é chamado dentro do load()
