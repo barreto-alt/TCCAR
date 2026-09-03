@@ -473,9 +473,9 @@ const ACOES = [
   {
     id:'cc-vale-alim',
     nivel:'atencao',
-    titulo:'🍽️ Vale-alimentação com variação extrema',
-    diag:'Jun: <span class="acao-num">R$ 8k</span>, jul: <span class="acao-num">R$ 47k</span>, ago: <span class="acao-num">R$ 1,4k</span>. Variação de <span class="acao-num">33×</span> entre meses. O valor de jul provavelmente inclui meses anteriores pagos em atraso. Impossível prever o impacto no caixa com esse comportamento.',
-    rec:'Regularizar pagamento mensal no mesmo dia. Conferir se há colaboradores recebendo em duplicidade. Alinhar com RH para fluxo previsível.'
+    titulo:'🍽️ Vale-alimentação: antecipação impacta o caixa de julho',
+    diag:'Jul/26 aparece com <span class="acao-num">R$ 47k</span> porque o VA de agosto foi pago no último dia de julho — o mês seguinte fica zerado (ago: <span class="acao-num">R$ 1,4k</span>). O mesmo ocorreu em dez/25 (<span class="acao-num">R$ 2,6k</span>) / jan/26 (<span class="acao-num">R$ 37k</span>). A prática é intencional, mas invisível no fluxo: os meses de antecipação parecem mais caros do que são e distorcem a análise.',
+    rec:'Registrar no fluxo de caixa a competência real (mês a que o VA se refere), separada da data de pagamento. Assim o custo mensal fica estável em ~R$ 25k e facilita comparação.'
   },
   {
     id:'cc-emprestimos',
@@ -1905,13 +1905,13 @@ function renderSaldos(){
   // Botão novo registro
   const addTrs=document.createElement('tr');
   addTrs.innerHTML=`<td colspan="9"><button onclick="
+    document.activeElement.blur();
     const hoje=new Date();
     const dd=String(hoje.getDate()).padStart(2,'0');
     const meses=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
     const mm=meses[hoje.getMonth()];
     const aa=String(hoje.getFullYear()).slice(2);
-    SALDOS_DATA.push({data:dd+'/'+mm+'/'+aa,bradesco:0,sicoob:0,itau:0,cc:0,inv:0,total:0});
-    renderSaldos();saveMeta();" style="background:none;border:1px dashed #378ADD;border-radius:6px;padding:4px 12px;color:#378ADD;cursor:pointer;width:100%;font-size:.85rem;">➕ Novo registro</button></td>`;
+    setTimeout(()=>{SALDOS_DATA.push({data:dd+'/'+mm+'/'+aa,bradesco:0,sicoob:0,itau:0,cc:0,inv:0,total:0});renderSaldos();saveMeta();},50);" style="background:none;border:1px dashed #378ADD;border-radius:6px;padding:4px 12px;color:#378ADD;cursor:pointer;width:100%;font-size:.85rem;">➕ Novo registro</button></td>`;
   tb.appendChild(addTrs);
 
   // Chart
