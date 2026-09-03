@@ -3,9 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TC CAR — Dashboard RH 2026</title>
-<!-- API_URL: cole aqui a URL do seu Google Apps Script após publicar -->
-<script>const API_URL = 'https://script.google.com/macros/s/AKfycbyZJIfpZ0m8UVYfpbH_kW6lGvFkdJ2VmGcLnK9AC4OPVu58kK50kFuYiWUKlWfQgC0t9w/exec';</script>
+<title>Gestão RH — Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL = 'https://pzjhmsfgzlasburqnssh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_P-N9RZtkcm_NvDlyTDTRKw_VPCzAJIE';
+const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+</script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; color: #1a1a2e; }
@@ -27,6 +31,19 @@ header h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: 1px; white-spac
 #loading-overlay p { color:white; font-size:.9rem; font-weight:600; }
 .btn-reset { padding: 5px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,.3); background: rgba(255,255,255,.1); color: white; cursor: pointer; font-size: 0.75rem; }
 .btn-reset:hover { background: rgba(220,38,38,.4); }
+#login-screen { display:none; position:fixed; inset:0; background:linear-gradient(135deg,#1a1a2e,#0f3460); z-index:1000; align-items:center; justify-content:center; }
+#login-screen.show { display:flex; }
+.login-box { background:white; border-radius:18px; padding:40px 36px; width:340px; box-shadow:0 20px 60px rgba(0,0,0,.3); }
+.login-box h2 { text-align:center; margin-bottom:6px; color:#1a1a2e; font-size:1.4rem; }
+.login-box p { text-align:center; color:#6b7280; font-size:0.82rem; margin-bottom:24px; }
+.login-field { margin-bottom:14px; }
+.login-field label { display:block; font-size:0.78rem; font-weight:600; color:#374151; margin-bottom:5px; }
+.login-field input { width:100%; padding:10px 12px; border:1.5px solid #d1d5db; border-radius:8px; font-size:0.9rem; outline:none; }
+.login-field input:focus { border-color:#0f3460; }
+.btn-login { width:100%; padding:11px; background:linear-gradient(135deg,#0f3460,#e94560); color:white; border:none; border-radius:8px; font-size:0.95rem; font-weight:700; cursor:pointer; margin-top:6px; }
+.btn-login:hover { opacity:.9; }
+.login-err { color:#dc2626; font-size:0.8rem; text-align:center; margin-top:8px; min-height:18px; }
+.user-badge { font-size:0.72rem; color:rgba(255,255,255,.75); }
 
 .tabs { display: flex; background: #fff; border-bottom: 2px solid #e0e4ef; padding: 0 28px; }
 .tab { padding: 12px 24px; cursor: pointer; font-size: 0.87rem; font-weight: 600; border-bottom: 3px solid transparent; margin-bottom: -2px; color: #6b7280; transition: all .2s; }
@@ -97,13 +114,26 @@ tr.demitido:hover td { background: #f3f4f6 !important; }
 </head>
 <body>
 
+<div id="login-screen" class="show">
+  <div class="login-box">
+    <h2>🏢 Gestão RH</h2>
+    <p id="login-subtitle">Acesse com seu e-mail e senha</p>
+    <div class="login-field" id="field-email"><label>E-mail</label><input type="email" id="login-email" placeholder="seu@email.com"></div>
+    <div class="login-field"><label>Senha</label><input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="btn-login" onclick="doLogin()">Entrar</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
 <div id="loading-overlay"><div class="spinner"></div><p id="loading-msg">Carregando dados...</p></div>
 
 <header>
-  <h1>🚗 TC CAR — Dashboard RH 2026</h1>
+  <h1 id="header-title">🚗 Dashboard RH</h1>
   <div class="header-right">
+    <span class="user-badge" id="user-badge"></span>
     <span id="save-ind" class="save-indicator">✓ Salvo</span>
-    <button class="btn-reset" onclick="confirmReset()">↺ Restaurar original</button>
+    <button class="btn-reset" onclick="confirmReset()">↺ Restaurar</button>
+    <button class="btn-reset" onclick="doLogout()" style="background:rgba(220,38,38,.3)">Sair</button>
   </div>
 </header>
 
@@ -111,6 +141,9 @@ tr.demitido:hover td { background: #f3f4f6 !important; }
   <div class="tab active" onclick="showTab('colab')">👥 Colaboradores</div>
   <div class="tab" onclick="showTab('pcmso')">🩺 PCMSO</div>
   <div class="tab" onclick="showTab('ferias')">🌴 Férias</div>
+  <div class="tab" onclick="showTab('uniformes')">👕 Uniformes</div>
+  <div class="tab" onclick="showTab('faturamento')">💰 Faturamento</div>
+  <div class="tab" onclick="showTab('financeiro')">📊 Financeiro</div>
 </div>
 
 <!-- COLABORADORES -->
@@ -221,6 +254,112 @@ tr.demitido:hover td { background: #f3f4f6 !important; }
   </div>
 </div>
 
+<!-- UNIFORMES -->
+<div id="tab-uniformes" class="content">
+  <div class="kpi-row">
+    <div class="kpi green"><div class="kpi-val" id="k-u-completos">—</div><div class="kpi-label">Com Uniforme Completo</div></div>
+    <div class="kpi orange"><div class="kpi-val" id="k-u-pendentes">—</div><div class="kpi-label">Pendentes</div></div>
+    <div class="kpi blue"><div class="kpi-val" id="k-u-epi">—</div><div class="kpi-label">Com EPI Completo</div></div>
+  </div>
+  <div class="section-title">Uniformes e EPIs — todos os colaboradores</div>
+  <p class="hint">💡 Clique em qualquer célula para editar tamanhos · Clique no badge de EPI para marcar como entregue</p>
+  <div class="toolbar">
+    <input class="search" type="text" placeholder="🔍 Nome…" oninput="F.uniformes.q=this.value;render('uniformes')">
+    <span class="count-lbl" id="cnt-uniformes"></span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th class="sort" onclick="S('uniformes',1)">Nome ↕</th>
+        <th>Status</th>
+        <th>👖 Calça</th>
+        <th>👕 Camisa</th>
+        <th>👢 Bota</th>
+        <th>🥽 Óculos</th>
+        <th>🧤 Luva</th>
+        <th>🔇 Abafador</th>
+      </tr></thead>
+      <tbody id="body-uniformes"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- FATURAMENTO -->
+<div id="tab-faturamento" class="content">
+  <div class="kpi-row">
+    <div class="kpi green"><div class="kpi-val" id="k-fat-total">R$ 5,46M</div><div class="kpi-label">Total 2026 (Jan–Ago)</div></div>
+    <div class="kpi blue"><div class="kpi-val" id="k-fat-media">R$ 682k</div><div class="kpi-label">Média mensal 2026</div></div>
+    <div class="kpi purple"><div class="kpi-val">+30%</div><div class="kpi-label">vs Jan–Ago 2025</div></div>
+    <div class="kpi orange"><div class="kpi-val">84%</div><div class="kpi-label">Serviços / Total</div></div>
+  </div>
+
+  <div class="section-title">Evolução mensal — comparativo por ano</div>
+  <div class="table-wrap" style="padding:16px;margin-bottom:20px">
+    <div style="position:relative;width:100%;height:320px">
+      <canvas id="chart-anos" role="img" aria-label="Gráfico de linha com faturamento mensal de 2023 a 2026"></canvas>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:20px">2026 — Serviços vs Produtos por mês</div>
+  <div class="table-wrap" style="padding:16px;margin-bottom:20px">
+    <div style="position:relative;width:100%;height:280px">
+      <canvas id="chart-2026" role="img" aria-label="Gráfico de barras empilhadas de serviços e produtos em 2026"></canvas>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:20px">Detalhamento 2026</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Mês</th><th style="text-align:right">Serviços</th><th style="text-align:right">Produtos</th><th style="text-align:right">Total</th><th style="text-align:right">% Serv.</th>
+      </tr></thead>
+      <tbody id="body-fat-2026"></tbody>
+    </table>
+  </div>
+
+  <div class="section-title" style="margin-top:24px">Histórico anual — total por mês</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Mês</th>
+        <th style="text-align:right">2023</th>
+        <th style="text-align:right">2024</th><th style="text-align:right">▲</th>
+        <th style="text-align:right">2025</th><th style="text-align:right">▲</th>
+        <th style="text-align:right">2026</th><th style="text-align:right">▲</th>
+      </tr></thead>
+      <tbody id="body-fat-hist"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- FINANCEIRO -->
+<div id="tab-financeiro" class="content">
+  <div class="kpi-row">
+    <div class="kpi blue"><div class="kpi-val" id="kf-receita">—</div><div class="kpi-label">Receita (mês sel.)</div></div>
+    <div class="kpi" style="border-left-color:#e94560"><div class="kpi-val" id="kf-despesas">—</div><div class="kpi-label">Total despesas (mês sel.)</div></div>
+    <div class="kpi" id="kf-res-card"><div class="kpi-val" id="kf-resultado">—</div><div class="kpi-label">Resultado de caixa</div></div>
+    <div class="kpi gray"><div class="kpi-val" id="kf-pct">—</div><div class="kpi-label">Despesas / receita</div></div>
+  </div>
+  <div class="toolbar" style="margin-bottom:16px">
+    <label style="font-size:.82rem;font-weight:600;color:#374151">Período:</label>
+    <select class="fsel" id="fin-periodo" onchange="renderFinanceiro()">
+      <option value="media">Média Jan–Ago</option>
+      <option value="ago" selected>Agosto</option>
+    </select>
+  </div>
+
+  <div class="section-title">Despesas por categoria</div>
+  <div class="table-wrap" style="padding:16px;margin-bottom:20px">
+    <div style="position:relative;width:100%;height:420px">
+      <canvas id="chart-fin" role="img" aria-label="Gráfico de barras horizontais de despesas por categoria"></canvas>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:20px">Detalhamento por categoria</div>
+  <div id="fin-accordions"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════════
 // DATA MODEL — um único array de colaboradores (master)
@@ -238,11 +377,13 @@ const DEFAULT_COLABS = [
 
   {id:mkId(),num:2, nome:'MARCILIO SOUZA DOS SANTOS',         cargo:'COORDENADOR TÉCNICO DE QUALIDADE',       salario:4500, status:'Ativo',   ajuda:0,   custo:6750,  obs:'férias ok',
    pcmso:{setor:'OFICINA',admissao:'2021-07-01',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'01/07/2025 a 30/06/2026',limite:'2027-07-15',data:'',dias:30,saldo:30,obs:''}},
+   ferias:{periodo:'01/07/2025 a 30/06/2026',limite:'2027-07-15',data:'',dias:30,saldo:30,obs:''},
+   uniformes:{calca:'G',camisa:'GG',bota:'',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:3, nome:'FELIPE NARDES OLIVEIRA',            cargo:'ESTOQUISTA',                             salario:2500, status:'Ativo',   ajuda:200, custo:3750,  obs:'férias 20 dias',
    pcmso:{setor:'OFICINA',admissao:'2023-10-10',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'10/10/2024 a 09/10/2025',limite:'2026-09-10',data:'2025-12-22',dias:20,saldo:0,obs:'Compramos 10 dias'}},
+   ferias:{periodo:'10/10/2024 a 09/10/2025',limite:'2026-09-10',data:'2025-12-22',dias:20,saldo:0,obs:'Compramos 10 dias'},
+   uniformes:{calca:'M',camisa:'M',bota:'38',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:4, nome:'MARCO ANTONIO RIBEIRO DE SOUZA',    cargo:'FUNILEIRO',                              salario:0,    status:'Afastado',ajuda:0,   custo:0,     obs:'Afastado',
    pcmso:{setor:'OFICINA',admissao:'2022-08-26',demissao:'',situacao:'S',sexo:'M'},
@@ -250,15 +391,18 @@ const DEFAULT_COLABS = [
 
   {id:mkId(),num:5, nome:'MATHEUS PETILIO BORGES',             cargo:'FUNILEIRO',                             salario:4200, status:'Ativo',   ajuda:0,   custo:6300,  obs:'férias de 15 dias',
    pcmso:{setor:'OFICINA',admissao:'2023-08-18',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'18/08/2025 a 17/08/2026',limite:'',data:'',dias:30,saldo:30,obs:''}},
+   ferias:{periodo:'18/08/2025 a 17/08/2026',limite:'',data:'',dias:30,saldo:30,obs:''},
+   uniformes:{calca:'M',camisa:'M',bota:'42',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:6, nome:'ROOSEVELT CHINA',                    cargo:'FUNILEIRO',                             salario:5000, status:'Ativo',   ajuda:100, custo:7500,  obs:'trabalha normal',
    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
-   ferias:{periodo:'06/06/2025 a 05/06/2026',limite:'2027-05-06',data:'',dias:30,saldo:30,obs:''}},
+   ferias:{periodo:'06/06/2025 a 05/06/2026',limite:'2027-05-06',data:'',dias:30,saldo:30,obs:''},
+   uniformes:{calca:'GG',camisa:'GG',bota:'43',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:7, nome:'SEBASTIAO GONCALO DOS SANTOS',       cargo:'FUNILEIRO MONTADOR',                    salario:6008, status:'Ativo',   ajuda:0,   custo:9012,  obs:'',
    pcmso:{setor:'OFICINA',admissao:'2023-02-09',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'09/02/2025 a 08/02/2026',limite:'2027-01-28',data:'',dias:10,saldo:10,obs:''}},
+   ferias:{periodo:'09/02/2025 a 08/02/2026',limite:'2027-01-28',data:'',dias:10,saldo:10,obs:''},
+   uniformes:{calca:'GG',camisa:'GG',bota:'',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:8, nome:'CARLOS',                             cargo:'FUNILEIRO SEM REGISTRO',                salario:6000, status:'Ativo',   ajuda:0,   custo:9000,  obs:'pago 1500/semana',
    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
@@ -274,7 +418,8 @@ const DEFAULT_COLABS = [
 
   {id:mkId(),num:11,nome:'JOSÉ APARECIDO',                     cargo:'MECÂNICO',                              salario:3500, status:'Ativo',   ajuda:100, custo:5250,  obs:'deve 3 dias natal',
    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
-   ferias:{periodo:'06/06/2025 a 05/06/2026',limite:'2027-05-06',data:'',dias:30,saldo:30,obs:''}},
+   ferias:{periodo:'06/06/2025 a 05/06/2026',limite:'2027-05-06',data:'',dias:30,saldo:30,obs:''},
+   uniformes:{calca:'M',camisa:'G',bota:'40',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:12,nome:'BRAULIO HENRIQUE',                   cargo:'MECÂNICO',                              salario:3200, status:'Ativo',   ajuda:0,   custo:4800,  obs:'montar caixa ferramentas',
    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
@@ -282,31 +427,38 @@ const DEFAULT_COLABS = [
 
   {id:mkId(),num:13,nome:'ERIC OLIVEIRA DA SILVA',             cargo:'TÉCNICO DE MONTAGEM E QUALIDADE',       salario:3216, status:'Ativo',   ajuda:200, custo:4824,  obs:'férias 15 dias',
    pcmso:{setor:'OFICINA',admissao:'2024-04-19',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'19/04/2025 a 18/04/2026',limite:'2027-03-18',data:'',dias:30,saldo:30,obs:''}},
+   ferias:{periodo:'19/04/2025 a 18/04/2026',limite:'2027-03-18',data:'',dias:30,saldo:30,obs:''},
+   uniformes:{calca:'G',camisa:'G',bota:'',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:14,nome:'WASHINGTON SILVA GERMANO FILHO',     cargo:'MONTADOR',                              salario:3700, status:'Ativo',   ajuda:0,   custo:5550,  obs:'talvez férias 6 jan',
    pcmso:{setor:'OFICINA',admissao:'2023-10-17',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'17/10/2024 a 16/10/2025',limite:'2026-09-17',data:'2026-01-12',dias:30,saldo:0,obs:''}},
+   ferias:{periodo:'17/10/2024 a 16/10/2025',limite:'2026-09-17',data:'2026-01-12',dias:30,saldo:0,obs:''},
+   uniformes:{calca:'G',camisa:'G',bota:'41',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:15,nome:'JOAO PAULO',                         cargo:'MONTADOR',                              salario:2800, status:'Ativo',   ajuda:100, custo:4200,  obs:'',
    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
-   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''},
+   uniformes:{calca:'M',camisa:'M',bota:'',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:16,nome:'GABRIEL ALBUQUERQUE SILVA',          cargo:'MONTADOR',                              salario:3000, status:'Ativo',   ajuda:100, custo:4500,  obs:'',
    pcmso:{setor:'OFICINA',admissao:'2021-11-11',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'11/11/2024 a 10/11/2025',limite:'2026-10-27',data:'',dias:15,saldo:15,obs:''}},
+   ferias:{periodo:'11/11/2024 a 10/11/2025',limite:'2026-10-27',data:'',dias:15,saldo:15,obs:''},
+   uniformes:{calca:'P',camisa:'M',bota:'41',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:17,nome:'VALDOMIRO RICARDO DA SILVA FILHO',   cargo:'MONTADOR 2',                            salario:3216, status:'Ativo',   ajuda:0,   custo:4824,  obs:'30 dias férias',
    pcmso:{setor:'OFICINA',admissao:'2022-06-20',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'20/06/2025 a 19/06/2026',limite:'2027-05-20',data:'',dias:30,saldo:30,obs:''}},
+   ferias:{periodo:'20/06/2025 a 19/06/2026',limite:'2027-05-20',data:'',dias:30,saldo:30,obs:''},
+   uniformes:{calca:'G',camisa:'G',bota:'42',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:18,nome:'CRISTOPHER',                         cargo:'MONTADOR',                              salario:2800, status:'Ativo',   ajuda:100, custo:4200,  obs:'trabalha normal',
    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
-   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''},
+   uniformes:{calca:'GG',camisa:'G',bota:'42',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:19,nome:'TIAGO HIDEKI YOGUI',                 cargo:'ORÇAMENTISTA TÉCNICO',                  salario:3500, status:'Ativo',   ajuda:200, custo:5250,  obs:'',
    pcmso:{setor:'ADMINISTRATIVO',admissao:'2022-11-10',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'10/11/2024 a 09/11/2025',limite:'2026-10-21',data:'',dias:20,saldo:20,obs:''}},
+   ferias:{periodo:'10/11/2024 a 09/11/2025',limite:'2026-10-21',data:'',dias:20,saldo:20,obs:''},
+   uniformes:{calca:'M',camisa:'M',bota:'',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:20,nome:'IGOR',                               cargo:'CHEFE DE OFICINA',                      salario:6800, status:'Ativo',   ajuda:0,   custo:10200, obs:'meta 12k total',
    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
@@ -322,15 +474,18 @@ const DEFAULT_COLABS = [
 
   {id:mkId(),num:23,nome:'JACKSON',                            cargo:'PINTOR',                                salario:3500, status:'Ativo',   ajuda:100, custo:5250,  obs:'férias 15 dias',
    pcmso:{setor:'OFICINA',admissao:'2025-04-15',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'15/04/2025 a 14/04/2026',limite:'2027-03-31',data:'',dias:15,saldo:15,obs:''}},
+   ferias:{periodo:'15/04/2025 a 14/04/2026',limite:'2027-03-31',data:'',dias:15,saldo:15,obs:''},
+   uniformes:{calca:'G',camisa:'G',bota:'43',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:24,nome:'JADSON',                             cargo:'PINTOR',                                salario:6000, status:'Ativo',   ajuda:100, custo:9000,  obs:'',
    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
-   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''},
+   uniformes:{calca:'G',camisa:'G',bota:'',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:25,nome:'RAFAEL',                             cargo:'PINTOR',                                salario:3800, status:'Ativo',   ajuda:0,   custo:5700,  obs:'',
    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
-   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''},
+   uniformes:{calca:'P',camisa:'P',bota:'40',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:26,nome:'IGOR (PINTOR)',                      cargo:'PINTOR',                                salario:4200, status:'Ativo',   ajuda:0,   custo:6300,  obs:'pagamento semanal até junho',
    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
@@ -342,7 +497,8 @@ const DEFAULT_COLABS = [
 
   {id:mkId(),num:28,nome:'ANTONIO TONINHO',                    cargo:'PINTOR',                                salario:4600, status:'Ativo',   ajuda:0,   custo:6900,  obs:'férias 15 dias',
    pcmso:{setor:'OFICINA',admissao:'2022-04-01',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'18/07/2025 a 17/07/2026',limite:'2027-06-17',data:'',dias:30,saldo:30,obs:''}},
+   ferias:{periodo:'18/07/2025 a 17/07/2026',limite:'2027-06-17',data:'',dias:30,saldo:30,obs:''},
+   uniformes:{calca:'G',camisa:'G',bota:'41',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:29,nome:'ALANA',                              cargo:'PREPARADORA',                           salario:2800, status:'Ativo',   ajuda:100, custo:4200,  obs:'receber 4000 total',
    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'F'},
@@ -350,23 +506,28 @@ const DEFAULT_COLABS = [
 
   {id:mkId(),num:31,nome:'NICOLLAS',                           cargo:'AJUDANTE DE PINTOR',                    salario:1500, status:'Ativo',   ajuda:140, custo:2250,  obs:'',
    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
-   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''},
+   uniformes:{calca:'M',camisa:'GG',bota:'42',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:32,nome:'ALEXANDRE',                          cargo:'PINTOR',                                salario:4000, status:'Ativo',   ajuda:0,   custo:6000,  obs:'',
    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
-   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''},
+   uniformes:{calca:'G',camisa:'',bota:'',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:33,nome:'PAULO CESAR SANTANA DA SILVA',       cargo:'POLIDOR',                               salario:3200, status:'Ativo',   ajuda:230, custo:4800,  obs:'registrar em 2027',
    pcmso:{setor:'OFICINA',admissao:'2021-07-01',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''},
+   uniformes:{calca:'',camisa:'',bota:'40',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:34,nome:'MATEUS',                             cargo:'POLIDOR',                               salario:2500, status:'Ativo',   ajuda:400, custo:3750,  obs:'férias sai 19 retorna 5 jan',
    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
-   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''},
+   uniformes:{calca:'G',camisa:'G',bota:'40',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:35,nome:'ANTONIO (POLIDOR)',                  cargo:'POLIDOR',                               salario:2450, status:'Ativo',   ajuda:100, custo:3675,  obs:'',
    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
-   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''},
+   uniformes:{calca:'M',camisa:'M',bota:'39',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:36,nome:'MATEUS INDICAÇÃO BOLA',              cargo:'PINTOR',                                salario:6000, status:'Ativo',   ajuda:0,   custo:9000,  obs:'pagar 1500/semana',
    pcmso:{setor:'OFICINA',admissao:'',demissao:'',situacao:'',sexo:'M'},
@@ -378,15 +539,18 @@ const DEFAULT_COLABS = [
 
   {id:mkId(),num:38,nome:'BRUNO HENRIQUE FELIZARDO DOS SANTOS',cargo:'PINTOR',                                salario:0,    status:'Ativo',   ajuda:0,   custo:0,     obs:'',
    pcmso:{setor:'OFICINA',admissao:'2023-04-25',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'25/04/2023 a 24/04/2024',limite:'2026-05-18',data:'2025-12-18',dias:15,saldo:0,obs:''}},
+   ferias:{periodo:'25/04/2023 a 24/04/2024',limite:'2026-05-18',data:'2025-12-18',dias:15,saldo:0,obs:''},
+   uniformes:{calca:'M',camisa:'M',bota:'42',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:39,nome:'MATHEUS RUAS',                       cargo:'PINTOR',                                salario:0,    status:'Ativo',   ajuda:0,   custo:0,     obs:'',
    pcmso:{setor:'OFICINA',admissao:'2022-07-18',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'18/07/2025 a 17/07/2026',limite:'2027-07-01',data:'',dias:15,saldo:15,obs:''}},
+   ferias:{periodo:'18/07/2025 a 17/07/2026',limite:'2027-07-01',data:'',dias:15,saldo:15,obs:''},
+   uniformes:{calca:'M',camisa:'M',bota:'39',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:40,nome:'ALISSON OLIVEIRA DOS SANTOS',        cargo:'PINTOR',                                salario:0,    status:'Ativo',   ajuda:0,   custo:0,     obs:'',
    pcmso:{setor:'OFICINA',admissao:'2025-04-15',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''},
+   uniformes:{calca:'G',camisa:'G',bota:'43',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:41,nome:'FABIANO DE SOUZA',                   cargo:'FUNILEIRO',                             salario:0,    status:'Ativo',   ajuda:0,   custo:0,     obs:'',
    pcmso:{setor:'OFICINA',admissao:'2024-12-03',demissao:'',situacao:'S',sexo:'M'},
@@ -394,15 +558,18 @@ const DEFAULT_COLABS = [
 
   {id:mkId(),num:42,nome:'HUDSON LUIZ OLIVEIRA CASTRO',        cargo:'POLIDOR',                               salario:0,    status:'Ativo',   ajuda:0,   custo:0,     obs:'',
    pcmso:{setor:'OFICINA',admissao:'2024-11-11',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''},
+   uniformes:{calca:'G',camisa:'G',bota:'43',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:43,nome:'LUIS MILLER AGUILAR DE OLIVEIRA',    cargo:'POLIDOR',                               salario:0,    status:'Ativo',   ajuda:0,   custo:0,     obs:'',
    pcmso:{setor:'OFICINA',admissao:'2025-04-15',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''},
+   uniformes:{calca:'G',camisa:'G',bota:'',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:44,nome:'WAGNER MARCULO',                     cargo:'PINTOR',                                salario:0,    status:'Ativo',   ajuda:0,   custo:0,     obs:'',
    pcmso:{setor:'OFICINA',admissao:'2024-12-03',demissao:'',situacao:'S',sexo:'M'},
-   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''}},
+   ferias:{periodo:'',limite:'',data:'',dias:0,saldo:0,obs:''},
+   uniformes:{calca:'',camisa:'GG',bota:'42',oculos:false,luva:false,abafador:false}},
 
   {id:mkId(),num:45,nome:'MATHEUS FRANCA DE QUEIROGA',         cargo:'PINTOR',                                salario:0,    status:'Ativo',   ajuda:0,   custo:0,     obs:'',
    pcmso:{setor:'OFICINA',admissao:'2025-04-15',demissao:'',situacao:'S',sexo:'M'},
@@ -413,14 +580,14 @@ const DEFAULT_COLABS = [
 // STATE
 // ═══════════════════════════════════════════════════════════════════
 let COLABS = [];
-const F = { colab:{q:'',st:''}, pcmso:{q:'',sit:''}, ferias:{q:''} };
-const SORTS = { colab:[1,1], pcmso:[1,1], ferias:[1,1] };
+const F = { colab:{q:'',st:''}, pcmso:{q:'',sit:''}, ferias:{q:''}, uniformes:{q:''} };
+const SORTS = { colab:[1,1], pcmso:[1,1], ferias:[1,1], uniformes:[1,1] };
 const TODAY = new Date('2026-08-12');
 
 // ═══════════════════════════════════════════════════════════════════
-// PERSIST — Google Sheets + localStorage como fallback
+// AUTH + PERSIST — Supabase
 // ═══════════════════════════════════════════════════════════════════
-const API_READY = API_URL && API_URL !== 'COLE_AQUI_A_URL_DO_APPS_SCRIPT';
+let _currentUser = null;
 
 function showOverlay(msg) {
   document.getElementById('loading-msg').textContent = msg || 'Carregando...';
@@ -429,57 +596,78 @@ function showOverlay(msg) {
 function hideOverlay() {
   document.getElementById('loading-overlay').classList.remove('show');
 }
-function showInd(cloud) {
+function showInd(ok) {
   const el = document.getElementById('save-ind');
   el.classList.remove('warn');
-  if (!cloud) { el.textContent = '💾 Salvo localmente'; el.classList.add('warn'); }
+  if (!ok) { el.textContent = '💾 Salvo localmente'; el.classList.add('warn'); }
   else { el.textContent = '☁️ Salvo na nuvem'; }
   el.classList.add('show');
   clearTimeout(window._st);
   window._st = setTimeout(() => { el.classList.remove('show','warn'); el.textContent='✓ Salvo'; }, 3000);
 }
 
-async function load() {
-  if (!API_READY) {
-    // sem API: usa localStorage ou defaults
-    const s = localStorage.getItem('tccar_v3');
-    COLABS = s ? JSON.parse(s) : JSON.parse(JSON.stringify(DEFAULT_COLABS));
-    renderAll();
-    return;
+// detecta e-mail no hash da URL (links de cliente)
+(function() {
+  const hash = window.location.hash.slice(1);
+  if (hash && hash.includes('@')) {
+    window._clientEmail = decodeURIComponent(hash);
+    document.getElementById('field-email').style.display = 'none';
+    document.getElementById('login-subtitle').textContent = 'Digite sua senha para acessar';
   }
-  showOverlay('Carregando dados da nuvem...');
-  try {
-    const r = await fetch(API_URL + '?t=' + Date.now());
-    const data = await r.json();
-    if (Array.isArray(data) && data.length > 0) {
-      COLABS = data;
-      localStorage.setItem('tccar_v3', JSON.stringify(COLABS)); // cache local
-    } else {
-      // planilha vazia: sobe os dados padrão
-      COLABS = JSON.parse(JSON.stringify(DEFAULT_COLABS));
-      await saveToCloud();
-    }
-  } catch(e) {
-    // offline: usa cache local
-    const s = localStorage.getItem('tccar_v3');
-    COLABS = s ? JSON.parse(s) : JSON.parse(JSON.stringify(DEFAULT_COLABS));
+})();
+
+async function doLogin() {
+  const emailField = document.getElementById('login-email').value.trim();
+  const email = window._clientEmail || emailField;
+  const pass  = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-err');
+  errEl.textContent = '';
+  if (!email || !pass) { errEl.textContent = 'Preencha e-mail e senha.'; return; }
+  const btn = document.querySelector('.btn-login');
+  btn.textContent = 'Entrando...'; btn.disabled = true;
+  const { data, error } = await _sb.auth.signInWithPassword({ email, password: pass });
+  btn.textContent = 'Entrar'; btn.disabled = false;
+  if (error) { errEl.textContent = 'Senha incorreta.'; return; }
+  await onLogin(data.user);
+}
+
+async function onLogin(user) {
+  _currentUser = user;
+  document.getElementById('login-screen').classList.remove('show');
+  document.getElementById('user-badge').textContent = user.email;
+  showOverlay('Carregando dados...');
+  // busca dados do usuário
+  const { data: row } = await _sb.from('empresas').select('dados,nome').eq('id', user.id).single();
+  if (row && Array.isArray(row.dados) && row.dados.length > 0) {
+    COLABS = row.dados;
+    if (row.nome) document.getElementById('header-title').textContent = '🚗 ' + row.nome;
+  } else {
+    // primeiro acesso: sobe dados padrão
+    COLABS = JSON.parse(JSON.stringify(DEFAULT_COLABS));
+    await _sb.from('empresas').upsert({ id: user.id, nome: 'TC CAR', dados: COLABS });
   }
   hideOverlay();
   renderAll();
 }
 
+async function doLogout() {
+  await _sb.auth.signOut();
+  _currentUser = null;
+  COLABS = [];
+  document.getElementById('login-screen').classList.add('show');
+  document.getElementById('user-badge').textContent = '';
+}
+
 async function saveToCloud() {
+  if (!_currentUser) return false;
   try {
-    await fetch(API_URL, { method:'POST', body: JSON.stringify(COLABS) });
-    return true;
-  } catch(e) {
-    return false;
-  }
+    const { error } = await _sb.from('empresas').upsert({ id: _currentUser.id, dados: COLABS });
+    return !error;
+  } catch(e) { return false; }
 }
 
 function save() {
-  localStorage.setItem('tccar_v3', JSON.stringify(COLABS)); // salva local imediatamente
-  if (!API_READY) { showInd(false); return; }
+  localStorage.setItem('tccar_v3', JSON.stringify(COLABS));
   saveToCloud().then(ok => showInd(ok));
 }
 
@@ -487,12 +675,20 @@ async function confirmReset() {
   if (!confirm('Restaurar todos os dados para o original? Edições serão perdidas.')) return;
   COLABS = JSON.parse(JSON.stringify(DEFAULT_COLABS));
   localStorage.removeItem('tccar_v3');
-  if (API_READY) {
-    showOverlay('Restaurando...');
-    await saveToCloud();
-    hideOverlay();
-  }
+  showOverlay('Restaurando...');
+  await saveToCloud();
+  hideOverlay();
   renderAll();
+}
+
+// ── INIT ──
+async function load() {
+  // verifica sessão existente
+  const { data: { session } } = await _sb.auth.getSession();
+  if (session) {
+    await onLogin(session.user);
+  }
+  // se não há sessão, a tela de login já está visível
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -596,11 +792,12 @@ function getRows(tab) {
 // ═══════════════════════════════════════════════════════════════════
 // RENDER
 // ═══════════════════════════════════════════════════════════════════
-function renderAll() { render('colab'); render('pcmso'); render('ferias'); }
+function renderAll() { render('colab'); render('pcmso'); render('ferias'); render('uniformes'); }
 function render(tab) {
   if(tab==='colab') renderColab();
   else if(tab==='pcmso') renderPcmso();
-  else renderFerias();
+  else if(tab==='ferias') renderFerias();
+  else renderUniformes();
 }
 
 function renderColab() {
@@ -755,6 +952,70 @@ function renderFerias() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// UNIFORMES
+// ═══════════════════════════════════════════════════════════════════
+function renderUniformes() {
+  let rows = COLABS.filter(c=>c.status!=='Demitido').map((c,i)=>({c,i}));
+  if(F.uniformes.q){const q=F.uniformes.q.toLowerCase();rows=rows.filter(x=>x.c.nome.toLowerCase().includes(q));}
+  rows.sort((a,b)=>a.c.nome.localeCompare(b.c.nome,'pt'));
+
+  const completos = COLABS.filter(c=>c.status!=='Demitido'&&c.uniformes&&c.uniformes.calca&&c.uniformes.camisa&&c.uniformes.bota).length;
+  const pendentes = COLABS.filter(c=>c.status!=='Demitido'&&(!c.uniformes||!c.uniformes.calca||!c.uniformes.camisa||!c.uniformes.bota)).length;
+  const epiCompleto = COLABS.filter(c=>c.status!=='Demitido'&&c.uniformes&&c.uniformes.oculos&&c.uniformes.luva&&c.uniformes.abafador).length;
+  document.getElementById('k-u-completos').textContent = completos;
+  document.getElementById('k-u-pendentes').textContent = pendentes;
+  document.getElementById('k-u-epi').textContent = epiCompleto;
+  document.getElementById('cnt-uniformes').textContent = rows.length + ' colaboradores';
+
+  const tbody = document.getElementById('body-uniformes');
+  tbody.innerHTML = '';
+  rows.forEach(({c,i})=>{
+    if(!c.uniformes) c.uniformes = {calca:'',camisa:'',bota:'',oculos:false,luva:false,abafador:false};
+    const u = c.uniformes;
+    const tr = document.createElement('tr');
+    tr.setAttribute('data-id', c.id);
+
+    // Nome
+    const ntd = document.createElement('td');
+    ntd.style.fontWeight='600'; ntd.textContent = c.nome;
+    tr.appendChild(ntd);
+
+    // Status badge
+    const stb = document.createElement('td');
+    const sb = document.createElement('span');
+    sb.className='badge '+(c.status==='Ativo'?'bg-green':c.status==='Afastado'?'bg-yellow':'bg-red');
+    sb.textContent=c.status; sb.style.cursor='default';
+    stb.appendChild(sb); tr.appendChild(stb);
+
+    // Calça, Camisa, Bota
+    ['calca','camisa','bota'].forEach(field=>{
+      tr.appendChild(etd(u[field]||'',field==='calca'?'Ex: 44':'Ex: M',v=>{
+        const idx=COLABS.findIndex(x=>x.id===c.id);
+        if(!COLABS[idx].uniformes) COLABS[idx].uniformes={calca:'',camisa:'',bota:'',oculos:false,luva:false,abafador:false};
+        COLABS[idx].uniformes[field]=v; save(); renderUniformes();
+      }));
+    });
+
+    // EPIs: óculos, luva, abafador
+    ['oculos','luva','abafador'].forEach(field=>{
+      const td = document.createElement('td'); td.style.textAlign='center';
+      const badge = document.createElement('span');
+      badge.className='badge '+(u[field]?'bg-green':'bg-red');
+      badge.textContent = u[field]?'✓ OK':'Pendente';
+      badge.style.cursor='pointer';
+      badge.onclick=()=>{
+        const idx=COLABS.findIndex(x=>x.id===c.id);
+        if(!COLABS[idx].uniformes) COLABS[idx].uniformes={calca:'',camisa:'',bota:'',oculos:false,luva:false,abafador:false};
+        COLABS[idx].uniformes[field]=!COLABS[idx].uniformes[field];
+        save(); renderUniformes();
+      };
+      td.appendChild(badge); tr.appendChild(td);
+    });
+
+    tbody.appendChild(tr);
+  });
+}
+
 // IMPORTAR FÉRIAS PDF 08/2026
 // ═══════════════════════════════════════════════════════════════════
 function importarFeriasPDF2608() {
@@ -810,11 +1071,276 @@ function addColab() {
 // ═══════════════════════════════════════════════════════════════════
 // TAB
 // ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
+// FATURAMENTO DATA
+// ═══════════════════════════════════════════════════════════════════
+const FAT_MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const FAT_2026 = {
+  servicos:[459488.48,561364.27,612417.60,622782.39,605163.99,615926.72,590195.39,535118.04],
+  produtos: [126268.72,100764.86, 83741.04,111821.25, 85344.54,119979.61,130413.07,107492.08],
+  totais:   [573151.20,662129.13,696308.64,734603.64,690508.53,735906.33,720608.46,642610.12]
+};
+const FAT_HIST = {
+  '2023':[351663.45,291700.45,476714.13,350275.91,475250.91,369956.39,385513.33,410302.14,371167.36,402382.24,311602.96,312539.25],
+  '2024':[256391.95,354279.78,432036.33,440813.69,441581.04,443533.62,452214.59,501375.24,440912.08,485822.09,421396.33,500058.55],
+  '2025':[467081.85,524922.12,505485.00,501352.00,524344.00,506605.79,584296.68,574990.56,611880.87,654398.84,650953.20,618529.81],
+  '2026':[573151.20,662129.13,696308.64,734603.64,690508.53,735906.33,720608.46,642610.12,null,null,null,null]
+};
+let _chartAnos=null, _chart2026=null;
+
+function brl(v){if(v==null)return'—';return'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function brlk(v){if(v==null)return'—';if(v>=1e6)return'R$ '+(v/1e6).toFixed(2).replace('.',',')+'M';return'R$ '+(v/1e3).toFixed(0)+'k';}
+function pct(a,b){if(!b)return'—';const p=((a-b)/b*100).toFixed(0);return(p>0?'+':'')+p+'%';}
+function pctClass(a,b){const p=(a-b)/b;return p>0?'venc-ok':p<-0.05?'venc-late':'venc-warn';}
+
+function renderFaturamento(){
+  // Tabela 2026
+  const tb26=document.getElementById('body-fat-2026');
+  if(tb26){
+    tb26.innerHTML='';
+    FAT_2026.totais.forEach((tot,i)=>{
+      const s=FAT_2026.servicos[i],p=FAT_2026.produtos[i];
+      const pct_s=((s/tot)*100).toFixed(1)+'%';
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td><b>${FAT_MESES[i]}</b></td>
+        <td style="text-align:right">${brl(s)}</td>
+        <td style="text-align:right">${brl(p)}</td>
+        <td style="text-align:right;font-weight:600">${brl(tot)}</td>
+        <td style="text-align:right;color:#10b981">${pct_s}</td>`;
+      tb26.appendChild(tr);
+    });
+    // Total row
+    const tot=FAT_2026.totais.reduce((a,b)=>a+b,0);
+    const srv=FAT_2026.servicos.reduce((a,b)=>a+b,0);
+    const prd=FAT_2026.produtos.reduce((a,b)=>a+b,0);
+    const trf=document.createElement('tr');
+    trf.style.fontWeight='700';trf.style.background='#f8faff';
+    trf.innerHTML=`<td>Total</td><td style="text-align:right">${brl(srv)}</td><td style="text-align:right">${brl(prd)}</td><td style="text-align:right">${brl(tot)}</td><td style="text-align:right;color:#10b981">${((srv/tot)*100).toFixed(1)}%</td>`;
+    tb26.appendChild(trf);
+  }
+  // Tabela histórico
+  const tbh=document.getElementById('body-fat-hist');
+  if(tbh){
+    tbh.innerHTML='';
+    FAT_MESES.forEach((mes,i)=>{
+      const v23=FAT_HIST['2023'][i],v24=FAT_HIST['2024'][i],v25=FAT_HIST['2025'][i],v26=FAT_HIST['2026'][i];
+      const tr=document.createElement('tr');
+      if(v26==null)tr.style.opacity='0.5';
+      tr.innerHTML=`<td><b>${mes}</b></td>
+        <td style="text-align:right">${brl(v23)}</td>
+        <td style="text-align:right">${brl(v24)}</td><td style="text-align:right;font-size:.75rem" class="${v24&&v23?pctClass(v24,v23):''}">${v23&&v24?pct(v24,v23):'—'}</td>
+        <td style="text-align:right">${brl(v25)}</td><td style="text-align:right;font-size:.75rem" class="${v25&&v24?pctClass(v25,v24):''}">${v24&&v25?pct(v25,v24):'—'}</td>
+        <td style="text-align:right">${v26!=null?brl(v26):'—'}</td><td style="text-align:right;font-size:.75rem" class="${v26&&v25?pctClass(v26,v25):''}">${v25&&v26!=null?pct(v26,v25):'—'}</td>`;
+      tbh.appendChild(tr);
+    });
+  }
+  // Charts (só monta quando a aba está visível)
+  setTimeout(()=>{
+    const c1=document.getElementById('chart-anos');
+    const c2=document.getElementById('chart-2026');
+    if(c1&&c1.offsetParent!==null){
+      if(_chartAnos)_chartAnos.destroy();
+      _chartAnos=new Chart(c1,{type:'line',data:{labels:FAT_MESES,datasets:[
+        {label:'2023',data:FAT_HIST['2023'],borderColor:'#888780',backgroundColor:'transparent',borderWidth:1.5,pointRadius:3,borderDash:[4,3]},
+        {label:'2024',data:FAT_HIST['2024'],borderColor:'#378ADD',backgroundColor:'transparent',borderWidth:1.5,pointRadius:3},
+        {label:'2025',data:FAT_HIST['2025'],borderColor:'#1D9E75',backgroundColor:'transparent',borderWidth:2,pointRadius:3},
+        {label:'2026',data:FAT_HIST['2026'],borderColor:'#e94560',backgroundColor:'rgba(233,69,96,.08)',borderWidth:2.5,pointRadius:4,fill:true}
+      ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>brlk(v)},grid:{color:'#e0e4ef'}},x:{grid:{display:false}}}}});
+    }
+    if(c2&&c2.offsetParent!==null){
+      if(_chart2026)_chart2026.destroy();
+      _chart2026=new Chart(c2,{type:'bar',data:{labels:FAT_MESES.slice(0,8),datasets:[
+        {label:'Serviços',data:FAT_2026.servicos,backgroundColor:'#185FA5',stack:'s'},
+        {label:'Produtos',data:FAT_2026.produtos,backgroundColor:'#378ADD',stack:'s'}
+      ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{stacked:true,ticks:{callback:v=>brlk(v)},grid:{color:'#e0e4ef'}},x:{stacked:true,grid:{display:false}}}}});
+    }
+  },50);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// FINANCEIRO DATA
+// ═══════════════════════════════════════════════════════════════════
+const FIN_RECEITA = {media:662706.97, ago:670623.78};
+const FIN_CATS = [
+  {nome:'Pessoal', media:218125.82, ago:195087.92, itens:[
+    {nome:'Salários',media:57800.95,ago:64761.31},
+    {nome:'Adiantamento salarial',media:41681.13,ago:46573.42},
+    {nome:'Pagamento avulso funcionário',media:40014.68,ago:34975.00},
+    {nome:'Vale-alimentação',media:24770.26,ago:1404.00},
+    {nome:'INSS sobre salários',media:10194.03,ago:11142.37},
+    {nome:'FGTS e multa de FGTS',media:13270.28,ago:9959.66},
+    {nome:'BONUS',media:4490.69,ago:11231.50},
+    {nome:'Férias',media:3731.19,ago:4506.24},
+    {nome:'Rescisões',media:7751.38,ago:1856.18},
+    {nome:'Metas',media:4455.00,ago:0},
+    {nome:'Contribuição sindical',media:717.91,ago:864.27},
+    {nome:'Cursos e treinamentos',media:857.50,ago:857.50},
+    {nome:'Exames médicos',media:1140.63,ago:780.00},
+    {nome:'Vale-transporte',media:1065.43,ago:1750.00},
+    {nome:'Bônus',media:1571.25,ago:0},
+    {nome:'Uniformes',media:455.94,ago:3217.50},
+    {nome:'Seguro de vida',media:324.53,ago:408.97},
+    {nome:'Remuneração de autônomos',media:1527.57,ago:800.00},
+    {nome:'PLR',media:2305.50,ago:0},
+  ]},
+  {nome:'Cartão empresarial', media:117622.24, ago:172224.43, itens:[
+    {nome:'Cartão de crédito empresarial',media:117622.24,ago:172224.43},
+  ]},
+  {nome:'Vendas e serviços', media:92227.60, ago:104873.09, itens:[
+    {nome:'Peças de concessionária',media:54956.34,ago:40015.30},
+    {nome:'Comissões de vendedores',media:12688.19,ago:25107.51},
+    {nome:'Materiais para pintura',media:3435.54,ago:18068.81},
+    {nome:'Serviços de terceiros',media:5768.88,ago:10245.83},
+    {nome:'Materiais para revenda/Peças',media:4579.27,ago:8305.64},
+    {nome:'Materiais aplicados nos serviços',media:9918.92,ago:3130.00},
+    {nome:'Peças aplicadas no serviço',media:567.96,ago:0},
+    {nome:'Recuperação de para-choque',media:312.50,ago:0},
+  ]},
+  {nome:'Diretoria', media:96620.04, ago:91945.99, itens:[
+    {nome:'Despesas pessoais dos sócios',media:93441.51,ago:88500.00},
+    {nome:'Plano de saúde dos sócios',media:3178.52,ago:3445.99},
+  ]},
+  {nome:'Imóvel', media:67238.30, ago:54782.56, itens:[
+    {nome:'Aluguel',media:39818.92,ago:43780.00},
+    {nome:'Manutenção predial',media:20324.82,ago:2441.85},
+    {nome:'Energia elétrica',media:5556.26,ago:6730.50},
+    {nome:'Água e saneamento',media:1250.86,ago:660.42},
+    {nome:'Seguro de imóveis',media:287.44,ago:1169.79},
+  ]},
+  {nome:'Empréstimos', media:28753.64, ago:41862.10, itens:[
+    {nome:'Empréstimos bancários',media:28753.64,ago:41862.10},
+  ]},
+  {nome:'Impostos s/ vendas', media:37012.35, ago:42031.26, itens:[
+    {nome:'Simples Nacional — DAS',media:36916.93,ago:41892.86},
+    {nome:'ICMS ST sobre vendas',media:95.42,ago:138.40},
+  ]},
+  {nome:'Comercial', media:21975.06, ago:28741.39, itens:[
+    {nome:'Marketing e publicidade',media:21903.54,ago:28741.39},
+    {nome:'Brindes para clientes',media:71.52,ago:0},
+  ]},
+  {nome:'Bens imobilizados', media:6899.28, ago:2414.97, itens:[
+    {nome:'Software e licenças',media:1908.70,ago:2414.97},
+    {nome:'Máquinas e equipamentos',media:4568.08,ago:0},
+    {nome:'Móveis e instalações comerciais',media:412.50,ago:0},
+    {nome:'Móveis e instalações admin.',media:10.00,ago:0},
+  ]},
+  {nome:'Administrativas', media:9801.38, ago:9170.81, itens:[
+    {nome:'Honorários de consultoria',media:3443.00,ago:3443.00},
+    {nome:'Honorários contábeis',media:2255.53,ago:2684.90},
+    {nome:'Manutenção de equipamentos',media:1060.70,ago:525.00},
+    {nome:'Materiais de escritório',media:373.76,ago:607.00},
+    {nome:'Lanches e refeições',media:150.63,ago:409.00},
+    {nome:'Copa e cozinha',media:508.86,ago:695.00},
+    {nome:'Materiais de limpeza',media:191.50,ago:277.00},
+    {nome:'Telefonia e internet',media:279.49,ago:295.65},
+    {nome:'Retenção de ISS',media:155.16,ago:192.26},
+    {nome:'Transporte urbano',media:151.50,ago:42.00},
+    {nome:'Honorários advocatícios',media:1130.26,ago:0},
+    {nome:'Honorários — outros',media:82.25,ago:0},
+    {nome:'Bens de pequeno valor',media:18.75,ago:0},
+  ]},
+  {nome:'Consórcio', media:2443.98, ago:1607.68, itens:[
+    {nome:'Consórcio',media:2443.98,ago:1607.68},
+  ]},
+  {nome:'Financeiras', media:855.11, ago:2591.41, itens:[
+    {nome:'Tarifas bancárias',media:633.95,ago:2211.01},
+    {nome:'Tarifas DOC/TED',media:221.16,ago:380.40},
+  ]},
+  {nome:'Devoluções', media:779.29, ago:0, itens:[
+    {nome:'Devoluções',media:779.29,ago:0},
+  ]},
+  {nome:'Fretes', media:287.06, ago:382.41, itens:[
+    {nome:'Frete',media:171.25,ago:60.00},
+    {nome:'Fretes pagos',media:115.81,ago:322.41},
+  ]},
+  {nome:'Outras despesas', media:375.63, ago:409.00, itens:[
+    {nome:'Despesas a identificar',media:318.00,ago:100.00},
+    {nome:'Troco',media:57.63,ago:309.00},
+  ]},
+  {nome:'Taxa municipal', media:279.93, ago:93.74, itens:[
+    {nome:'Taxa de licença da prefeitura',media:279.93,ago:93.74},
+  ]},
+  {nome:'Veículos', media:275.25, ago:570.00, itens:[
+    {nome:'Combustíveis',media:264.25,ago:544.00},
+    {nome:'Pedágios',media:3.25,ago:26.00},
+    {nome:'Manutenção de veículos',media:7.75,ago:0},
+  ]},
+];
+
+let _chartFin=null;
+const FIN_OPEN = {};
+
+function renderFinanceiro(){
+  const per = document.getElementById('fin-periodo')?.value||'ago';
+  const rec = FIN_RECEITA[per];
+  const tot = FIN_CATS.reduce((s,c)=>s+c[per],0);
+  const res = rec - tot;
+
+  document.getElementById('kf-receita').textContent = brlk(rec);
+  document.getElementById('kf-despesas').textContent = brlk(tot);
+  document.getElementById('kf-resultado').textContent = (res<0?'–':'')+brlk(Math.abs(res));
+  document.getElementById('kf-pct').textContent = ((tot/rec)*100).toFixed(1)+'%';
+  const resCard = document.getElementById('kf-res-card');
+  resCard.style.borderLeftColor = res<0?'#ef4444':'#10b981';
+  document.getElementById('kf-resultado').style.color = res<0?'#ef4444':'#10b981';
+
+  // Accordions
+  const acc = document.getElementById('fin-accordions');
+  acc.innerHTML='';
+  const sorted = [...FIN_CATS].sort((a,b)=>b[per]-a[per]);
+  sorted.forEach(cat=>{
+    const val=cat[per]; const pct_rec=((val/rec)*100).toFixed(1);
+    const key=cat.nome;
+    const wrap=document.createElement('div');
+    wrap.style.cssText='background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:10px;overflow:hidden';
+    const header=document.createElement('div');
+    header.style.cssText='display:flex;align-items:center;padding:10px 14px;cursor:pointer;gap:10px;border-bottom:1px solid #f0f2f5';
+    header.innerHTML=`<span style="font-size:.85rem;font-weight:700;flex:1;color:#1a1a2e">${key}</span>
+      <span style="font-size:.8rem;color:#6b7280;min-width:80px;text-align:right">${pct_rec}% receita</span>
+      <span style="font-size:.85rem;font-weight:700;min-width:110px;text-align:right;color:#1a1a2e">${brl(val)}</span>
+      <span style="font-size:.8rem;color:#9ca3af;margin-left:4px">${FIN_OPEN[key]?'▲':'▼'}</span>`;
+    const body=document.createElement('div');
+    body.style.display=FIN_OPEN[key]?'block':'none';
+    const tbl=document.createElement('table');
+    tbl.style.cssText='width:100%;font-size:.79rem;border-collapse:collapse';
+    cat.itens.forEach(item=>{
+      const v=item[per]; if(v===0&&per==='ago'){/* show zeroes */}
+      const pr=rec>0?((v/rec)*100).toFixed(2):'0.00';
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td style="padding:6px 14px;color:#374151;border-bottom:0.5px solid #f0f2f5">${item.nome}</td>
+        <td style="padding:6px 14px;text-align:right;color:#6b7280;border-bottom:0.5px solid #f0f2f5">${pr}%</td>
+        <td style="padding:6px 14px;text-align:right;font-weight:600;border-bottom:0.5px solid #f0f2f5;${v===0?'color:#d1d5db':''}">${brl(v)}</td>`;
+      tbl.appendChild(tr);
+    });
+    body.appendChild(tbl);
+    header.onclick=()=>{FIN_OPEN[key]=!FIN_OPEN[key];renderFinanceiro();};
+    wrap.appendChild(header); wrap.appendChild(body);
+    acc.appendChild(wrap);
+  });
+
+  // Chart
+  setTimeout(()=>{
+    const c=document.getElementById('chart-fin');
+    if(!c||c.offsetParent===null)return;
+    if(_chartFin)_chartFin.destroy();
+    const top=sorted.slice(0,12);
+    const colors=['#185FA5','#e94560','#1D9E75','#BA7517','#533AB7','#D85A30','#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444','#6b7280'];
+    _chartFin=new Chart(c,{type:'bar',data:{
+      labels:top.map(c=>c.nome),
+      datasets:[{label:'R$',data:top.map(c=>c[per]),backgroundColor:colors,borderRadius:4}]
+    },options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+brl(ctx.raw)}}},
+      scales:{x:{ticks:{callback:v=>brlk(v)},grid:{color:'#e0e4ef'}},y:{grid:{display:false},ticks:{font:{size:11}}}}}});
+  },50);
+}
+
 function showTab(tab) {
-  ['colab','pcmso','ferias'].forEach((t,i)=>{
+  ['colab','pcmso','ferias','uniformes','faturamento','financeiro'].forEach((t,i)=>{
     document.querySelectorAll('.tab')[i].classList.toggle('active',t===tab);
     document.getElementById('tab-'+t).classList.toggle('active',t===tab);
   });
+  if(tab==='faturamento') renderFaturamento();
+  if(tab==='financeiro') renderFinanceiro();
 }
 
 load(); // renderAll() é chamado dentro do load()
