@@ -146,6 +146,7 @@ tr.demitido:hover td { background: #f3f4f6 !important; }
   <div class="tab" onclick="showTab('financeiro')">📊 Financeiro</div>
   <div class="tab" onclick="showTab('saldos')">🏦 Saldos</div>
   <div class="tab" onclick="showTab('fluxo')">💵 Fluxo</div>
+  <div class="tab" onclick="showTab('acoes')">🎯 Ações</div>
 </div>
 
 <!-- COLABORADORES -->
@@ -392,6 +393,193 @@ tr.demitido:hover td { background: #f3f4f6 !important; }
       <tbody id="body-saldos"></tbody>
     </table>
   </div>
+</div>
+
+<!-- AÇÕES -->
+<div id="tab-acoes" class="content">
+<style>
+.acao-card{background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.07);padding:18px 22px;margin-bottom:14px;border-left:5px solid #9ca3af;display:flex;flex-direction:column;gap:8px;}
+.acao-card.critico{border-left-color:#ef4444;}
+.acao-card.atencao{border-left-color:#f59e0b;}
+.acao-card.positivo{border-left-color:#10b981;}
+.acao-card.oportunidade{border-left-color:#3b82f6;}
+.acao-header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.acao-badge{font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;}
+.badge-critico{background:#fee2e2;color:#dc2626;}
+.badge-atencao{background:#fef3c7;color:#d97706;}
+.badge-positivo{background:#d1fae5;color:#059669;}
+.badge-oportunidade{background:#dbeafe;color:#2563eb;}
+.acao-titulo{font-size:.95rem;font-weight:700;color:#1a1a2e;flex:1;}
+.acao-diag{font-size:.82rem;color:#374151;line-height:1.6;}
+.acao-num{font-weight:700;color:#1a1a2e;}
+.acao-rec{font-size:.8rem;color:#0f3460;background:#f0f4ff;border-radius:6px;padding:8px 12px;margin-top:2px;}
+.acao-rec::before{content:'→ ';font-weight:700;}
+.acao-status{margin-left:auto;display:flex;align-items:center;gap:6px;}
+.status-sel{font-size:.75rem;border:1px solid #d1d5db;border-radius:6px;padding:4px 8px;background:white;cursor:pointer;outline:none;}
+</style>
+
+<div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap">
+  <div class="section-title" style="margin:0">Plano de Ações — Análise jan–ago/26</div>
+  <div style="margin-left:auto;font-size:.78rem;color:#9ca3af">Baseado nos dados reais do fluxo de caixa</div>
+</div>
+
+<!-- KPIs resumo -->
+<div class="kpi-row" style="margin-bottom:20px">
+  <div class="kpi" style="border-left-color:#ef4444"><div class="kpi-val" style="color:#ef4444">–R$ 311k</div><div class="kpi-label">Queima de caixa acumulada 2026</div></div>
+  <div class="kpi" style="border-left-color:#ef4444"><div class="kpi-val">6/8</div><div class="kpi-label">Meses com geração negativa em 2026</div></div>
+  <div class="kpi" style="border-left-color:#f59e0b"><div class="kpi-val" style="color:#f59e0b">–57%</div><div class="kpi-label">Queda nas contas correntes (dez/25→ago/26)</div></div>
+  <div class="kpi green"><div class="kpi-val">+R$ 172k</div><div class="kpi-label">Crescimento em investimentos</div></div>
+</div>
+
+<div id="acoes-lista"></div>
+
+<script>
+const ACOES = [
+  {
+    id:'cc-cartao',
+    nivel:'critico',
+    titulo:'🚨 Cartão de crédito empresarial fora de controle',
+    diag:'Cresceu <span class="acao-num">+164%</span> em 7 meses: de <span class="acao-num">R$ 65k</span> (jan) para <span class="acao-num">R$ 175k</span> (jul). Acumulado jan–ago: <span class="acao-num">R$ 941k</span>. É a <b>maior despesa avulsa</b> do negócio, superando folha de pagamento em alguns meses. Não há subcategorias visíveis — impossível saber o que está sendo comprado.',
+    rec:'Exigir extrato mensal detalhado. Categorizar lançamentos no sistema. Definir limite máximo mensal e aprovação prévia para compras acima de R$ 5k.'
+  },
+  {
+    id:'cc-caixa-negativo',
+    nivel:'critico',
+    titulo:'📉 Fluxo operacional negativo na maioria dos meses',
+    diag:'Em 2026: jan <span class="acao-num">–R$ 129k</span>, abr <span class="acao-num">–R$ 25k</span>, mai <span class="acao-num">–R$ 100k</span>, jun <span class="acao-num">–R$ 17k</span>, jul <span class="acao-num">–R$ 140k</span>, ago <span class="acao-num">–R$ 78k</span>. Acumulado: <span class="acao-num">–R$ 311k</span>. Em 2025, o acumulado foi –R$ 47k no ano inteiro. A situação piorou 6× em 8 meses.',
+    rec:'Comparar receita com pagamentos mês a mês e identificar em qual categoria o crescimento está superando a receita. Cartão de crédito e folha são os principais candidatos.'
+  },
+  {
+    id:'cc-avulso',
+    nivel:'critico',
+    titulo:'👷 Pagamento avulso funcionário sem estrutura',
+    diag:'Total jan–ago: <span class="acao-num">R$ 320k</span> (~<span class="acao-num">R$ 40k/mês</span>). Esse valor não passa pela folha formal — não há FGTS, INSS nem férias sobre esses pagamentos, o que gera <b>risco trabalhista</b>. Em jun foi <span class="acao-num">R$ 53k</span> (o maior mês). É a 3ª maior despesa recorrente.',
+    rec:'Mapear quem recebe esses valores. Avaliar formalização via CLT ou MEI/PJ. Se são funcionários registrados, entender por que saem fora da folha.'
+  },
+  {
+    id:'cc-diretoria',
+    nivel:'atencao',
+    titulo:'💼 Despesas com diretoria crescendo acima da receita',
+    diag:'Média 2026: <span class="acao-num">R$ 96k/mês</span> vs média 2025: <span class="acao-num">R$ 82k/mês</span> — aumento de <span class="acao-num">+17%</span>. Em jun/26 bateu <span class="acao-num">R$ 121k</span>. Inclui despesas pessoais dos sócios + plano de saúde. Representa ~<span class="acao-num">14%</span> da receita total.',
+    rec:'Definir pró-labore fixo e separar despesas pessoais de empresariais formalmente. Monitorar mensalmente com meta de manter abaixo de R$ 90k.'
+  },
+  {
+    id:'cc-manutencao',
+    nivel:'atencao',
+    titulo:'🏗️ Manutenção predial concentrada e sem planejamento',
+    diag:'Abr: <span class="acao-num">R$ 25k</span>, mai: <span class="acao-num">R$ 69k</span>, jun: <span class="acao-num">R$ 44k</span> — total <span class="acao-num">R$ 138k em 3 meses</span>. O gasto mensal normal é ~R$ 2–4k. Esse pico contribuiu diretamente para os piores meses de geração de caixa (mai: –R$ 100k, jun: –R$ 17k). Julho e agosto voltaram a R$ 11k e R$ 2k.',
+    rec:'Confirmar se a obra foi concluída e se há novas frentes planejadas. Criar fundo de reserva para manutenção (~R$ 5k/mês) para evitar impactos pontuais no caixa.'
+  },
+  {
+    id:'cc-vale-alim',
+    nivel:'atencao',
+    titulo:'🍽️ Vale-alimentação com variação extrema',
+    diag:'Jun: <span class="acao-num">R$ 8k</span>, jul: <span class="acao-num">R$ 47k</span>, ago: <span class="acao-num">R$ 1,4k</span>. Variação de <span class="acao-num">33×</span> entre meses. O valor de jul provavelmente inclui meses anteriores pagos em atraso. Impossível prever o impacto no caixa com esse comportamento.',
+    rec:'Regularizar pagamento mensal no mesmo dia. Conferir se há colaboradores recebendo em duplicidade. Alinhar com RH para fluxo previsível.'
+  },
+  {
+    id:'cc-emprestimos',
+    nivel:'atencao',
+    titulo:'🏦 Empréstimos com salto em jan e a partir de jun',
+    diag:'Jan: <span class="acao-num">R$ 40k</span>, fev–mai: ~<span class="acao-num">R$ 16k</span> (estável), jun–ago: <span class="acao-num">R$ 41–42k</span>. Parece que houve um novo empréstimo captado em jun. Total jan–ago: <span class="acao-num">R$ 229k</span> em juros/parcelas.',
+    rec:'Listar todas as dívidas ativas com saldo devedor, taxa e vencimento. Avaliar quitação antecipada com os recursos em investimentos (R$ 372k).'
+  },
+  {
+    id:'cc-terceiros',
+    nivel:'atencao',
+    titulo:'🔧 Serviços de terceiros crescendo sem monitoramento',
+    diag:'Jan: <span class="acao-num">R$ 0</span>, cresceu para <span class="acao-num">R$ 18k</span> (jul) e <span class="acao-num">R$ 10k</span> (ago). Quais serviços foram contratados ao longo do ano? Não há detalhamento visível.',
+    rec:'Identificar os contratos de terceiros ativos. Verificar se têm prazo definido ou são mensais indefinidos. Avaliar o retorno de cada um.'
+  },
+  {
+    id:'cc-marketing',
+    nivel:'oportunidade',
+    titulo:'📢 Marketing sem rastreamento de retorno',
+    diag:'Gasto médio: <span class="acao-num">R$ 22k/mês</span> (R$ 176k jan–ago/26). É o 5º maior gasto recorrente. Sem dados de leads, conversão ou origem dos clientes, é impossível saber se o investimento está funcionando.',
+    rec:'Implementar UTM tracking nas campanhas. Perguntar a todo novo cliente como conheceu a TC CAR. Meta: saber de onde vem pelo menos 70% dos clientes novos.'
+  },
+  {
+    id:'cc-pecas',
+    nivel:'positivo',
+    titulo:'✅ Peças de concessionária caindo — eficiência melhorando',
+    diag:'Jan: <span class="acao-num">R$ 78k</span> → ago: <span class="acao-num">R$ 40k</span> — queda de <span class="acao-num">–49%</span>. Isso é um sinal positivo de melhor negociação com fornecedores, menor desperdício ou mix de serviços mais eficiente.',
+    rec:'Identificar o que causou a melhora e institucionalizar. Avaliar se há margem para negociar ainda mais com fornecedores de peças.'
+  },
+  {
+    id:'cc-investimentos',
+    nivel:'positivo',
+    titulo:'✅ Carteira de investimentos crescendo',
+    diag:'Dez/25: <span class="acao-num">R$ 200k</span> → ago/26: <span class="acao-num">R$ 373k</span> — crescimento de <span class="acao-num">+86%</span>. Isso indica que a empresa tem disciplina de aportar em aplicações financeiras mesmo com fluxo de caixa negativo operacionalmente.',
+    rec:'Manter a reserva mínima de R$ 300k em investimentos como fundo de emergência. Avaliar liquidez dos investimentos caso o caixa operacional aperte mais.'
+  },
+  {
+    id:'cc-concentracao-receita',
+    nivel:'atencao',
+    titulo:'📦 Concentração de receita — falta visibilidade por serviço',
+    diag:'O faturamento aparece agregado (serviços + produtos), sem abertura por tipo de serviço, por carro ou por cliente. Sem essa visão é impossível saber quais serviços têm maior margem ou quais clientes representam maior risco de saída.',
+    rec:'Implementar centro de custo por tipo de serviço (revisão, elétrica, lataria, etc.). Com o ClickUp já integrado, criar projetos por categoria para rastrear horas + custo de peças por serviço.'
+  },
+  {
+    id:'cc-sazonalidade',
+    nivel:'oportunidade',
+    titulo:'📅 Sazonalidade não mapeada — meses fracos previsíveis',
+    diag:'Em 2025, os meses com menor geração de caixa foram jan, fev e ago — padrão típico do setor automotivo pós-férias. Em 2026 jan e fev repetiram o padrão (–R$ 129k e –R$ 56k). Saber isso com antecedência permite planejar.',
+    rec:'Criar orçamento mensal com metas diferenciadas por sazonalidade. Nos meses fortes (mai–jul), priorizar amortização de dívidas. Nos meses fracos, reduzir despesas discricionárias (marketing, diretoria).'
+  },
+  {
+    id:'cc-kpi-colaboradores',
+    nivel:'oportunidade',
+    titulo:'👥 Cruzar folha de pagamento com produtividade',
+    diag:'Os dados de colaboradores estão no dashboard (PCMSO, férias, uniformes) mas não há nenhum indicador de produtividade: receita por funcionário, horas trabalhadas, ou absenteísmo. A folha total (formal + avulso) ultrapassa <span class="acao-num">R$ 100k/mês</span> sem visibilidade de retorno.',
+    rec:'Calcular receita por colaborador mensalmente. Identificar se há funcionários com horas ociosas ou áreas de serviço com gargalo. Meta: receita/colaborador acima de R$ 15k/mês.'
+  },
+  {
+    id:'cc-previsibilidade',
+    nivel:'oportunidade',
+    titulo:'📊 Sem orçamento anual — tudo é gestão de crise',
+    diag:'Não há dados de orçamento vs. realizado no dashboard. As decisões são tomadas com base no que sobrou no caixa, não em metas projetadas. Isso dificulta negociar com bancos, planejar investimentos e cobrar resultados da equipe.',
+    rec:'Criar um orçamento anual simples: projetar receita e as 8 maiores despesas mês a mês. Revisar mensalmente no dashboard comparando previsto × realizado. A aba Fluxo já tem a estrutura — falta o orçado.'
+  },
+  {
+    id:'cc-inadimplencia',
+    nivel:'atencao',
+    titulo:'💳 Recebimentos de cartão — verificar prazo de repasse',
+    diag:'Parte da receita vem de cartão de crédito dos clientes. Dependendo da adquirente e do plano de parcelamento, o repasse pode levar 30–90 dias. Se o faturamento cresce mas o caixa fica negativo, pode haver defasagem de recebimento não mapeada.',
+    rec:'Mapear quais % das vendas são à vista, débito, crédito 1×, crédito parcelado. Negociar antecipação de recebíveis nos meses de caixa apertado — custo geralmente inferior ao do cheque especial.'
+  },
+];
+
+function renderAcoes(){
+  const lista = document.getElementById('acoes-lista');
+  if(!lista) return;
+  const saved = JSON.parse(localStorage.getItem('tccar_acoes')||'{}');
+  lista.innerHTML = ACOES.map(a=>{
+    const st = saved[a.id]||'pendente';
+    const stColor = st==='resolvido'?'#10b981':st==='andamento'?'#f59e0b':'#9ca3af';
+    return `<div class="acao-card ${a.nivel}" style="opacity:${st==='resolvido'?.6:1}">
+      <div class="acao-header">
+        <span class="acao-badge badge-${a.nivel}">${a.nivel==='critico'?'🔴 CRÍTICO':a.nivel==='atencao'?'🟡 ATENÇÃO':a.nivel==='positivo'?'🟢 POSITIVO':'🔵 OPORTUNIDADE'}</span>
+        <span class="acao-titulo">${a.titulo}</span>
+        <div class="acao-status">
+          <span style="font-size:.72rem;color:${stColor};font-weight:600">${st==='resolvido'?'✓ Resolvido':st==='andamento'?'⟳ Em andamento':'○ Pendente'}</span>
+          <select class="status-sel" onchange="saveAcao('${a.id}',this.value)">
+            <option value="pendente" ${st==='pendente'?'selected':''}>Pendente</option>
+            <option value="andamento" ${st==='andamento'?'selected':''}>Em andamento</option>
+            <option value="resolvido" ${st==='resolvido'?'selected':''}>Resolvido</option>
+          </select>
+        </div>
+      </div>
+      <div class="acao-diag">${a.diag}</div>
+      <div class="acao-rec">${a.rec}</div>
+    </div>`;
+  }).join('');
+}
+function saveAcao(id,val){
+  const d=JSON.parse(localStorage.getItem('tccar_acoes')||'{}');
+  d[id]=val; localStorage.setItem('tccar_acoes',JSON.stringify(d));
+  renderAcoes();
+}
+</script>
 </div>
 
 <!-- FLUXO DE CAIXA -->
@@ -1661,6 +1849,22 @@ let SALDOS_DATA = [
 let _chartSaldos=null;
 
 function calcSaldo(s){s.cc=(s.bradesco||0)+(s.sicoob||0)+(s.itau||0);s.total=s.cc+(s.inv||0);}
+function liveCalc(i){
+  const b=parseBrl(document.getElementById('brad-'+i)?.textContent||'0');
+  const sc=parseBrl(document.getElementById('sico-'+i)?.textContent||'0');
+  const it=parseBrl(document.getElementById('itau-'+i)?.textContent||'0');
+  const iv=parseBrl(document.getElementById('inv-'+i)?.textContent||'0');
+  const cc=b+sc+it, tot=cc+iv;
+  const ccEl=document.getElementById('cc-'+i), totEl=document.getElementById('tot-'+i);
+  if(ccEl) ccEl.textContent=brl(cc);
+  if(totEl) totEl.textContent=brl(tot);
+  // Variação da linha seguinte
+  if(i>0){
+    const prevTot=parseBrl(document.getElementById('tot-'+(i-1))?.textContent||'0');
+    const varEl=document.getElementById('var-'+i);
+    if(varEl){const d=tot-prevTot;varEl.textContent=(d<0?'–':'+')+brl(Math.abs(d));varEl.style.color=d<0?'#ef4444':'#10b981';}
+  }
+}
 function renderSaldos(){
   const ultimo=SALDOS_DATA[SALDOS_DATA.length-1];
   const penult=SALDOS_DATA[SALDOS_DATA.length-2];
@@ -1680,19 +1884,21 @@ function renderSaldos(){
     calcSaldo(SALDOS_DATA[i]);
     renderSaldos();saveMeta();
   }
+  // Recalcula cc e total de todas as linhas ao renderizar
+  SALDOS_DATA.forEach(s=>calcSaldo(s));
   SALDOS_DATA.forEach((s,i)=>{
     const var_=i>0?s.total-SALDOS_DATA[i-1].total:null;
     const isNew=s.data.includes('/26');
     const tr=document.createElement('tr');
     if(!isNew)tr.style.opacity='0.7';
     tr.innerHTML=`<td><b contenteditable="true" style="outline:none" onblur="SALDOS_DATA[${i}].data=this.textContent.trim();saveMeta();">${s.data}</b></td>
-      <td ${cedit()} onblur="saveField(${i},'bradesco',this)">${brl(s.bradesco)}</td>
-      <td ${cedit()} onblur="saveField(${i},'sicoob',this)">${brl(s.sicoob)}</td>
-      <td ${cedit()} onblur="saveField(${i},'itau',this)">${brl(s.itau||0)}</td>
-      <td style="text-align:right;font-weight:600">${brl(s.cc)}</td>
-      <td ${cedit()} onblur="saveField(${i},'inv',this)">${brl(s.inv)}</td>
-      <td style="text-align:right;font-weight:800">${brl(s.total)}</td>
-      <td style="text-align:right;font-size:.8rem;color:${var_==null?'#9ca3af':var_<0?'#ef4444':'#10b981'}">${var_==null?'—':(var_<0?'–':'+')+brl(Math.abs(var_))}</td>
+      <td ${cedit()} id="brad-${i}" oninput="liveCalc(${i})" onblur="saveField(${i},'bradesco',this)">${brl(s.bradesco)}</td>
+      <td ${cedit()} id="sico-${i}" oninput="liveCalc(${i})" onblur="saveField(${i},'sicoob',this)">${brl(s.sicoob)}</td>
+      <td ${cedit()} id="itau-${i}" oninput="liveCalc(${i})" onblur="saveField(${i},'itau',this)">${brl(s.itau||0)}</td>
+      <td style="text-align:right;font-weight:600" id="cc-${i}">${brl(s.cc)}</td>
+      <td ${cedit()} id="inv-${i}" oninput="liveCalc(${i})" onblur="saveField(${i},'inv',this)">${brl(s.inv)}</td>
+      <td style="text-align:right;font-weight:800" id="tot-${i}">${brl(s.total)}</td>
+      <td style="text-align:right;font-size:.8rem;color:${var_==null?'#9ca3af':var_<0?'#ef4444':'#10b981'}" id="var-${i}">${var_==null?'—':(var_<0?'–':'+')+brl(Math.abs(var_))}</td>
       <td><button onclick="SALDOS_DATA.splice(${i},1);renderSaldos();saveMeta();" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:.9rem;" title="Remover">🗑</button></td>`;
     tb.appendChild(tr);
   });
@@ -1904,7 +2110,7 @@ function renderFinanceiro(){
 }
 
 function showTab(tab) {
-  ['colab','pcmso','ferias','uniformes','faturamento','financeiro','saldos','fluxo'].forEach((t,i)=>{
+  ['colab','pcmso','ferias','uniformes','faturamento','financeiro','saldos','fluxo','acoes'].forEach((t,i)=>{
     document.querySelectorAll('.tab')[i].classList.toggle('active',t===tab);
     document.getElementById('tab-'+t).classList.toggle('active',t===tab);
   });
@@ -1912,6 +2118,7 @@ function showTab(tab) {
   if(tab==='financeiro') renderFinanceiro();
   if(tab==='saldos') renderSaldos();
   if(tab==='fluxo') renderFluxo();
+  if(tab==='acoes') renderAcoes();
 }
 
 load(); // renderAll() é chamado dentro do load()
