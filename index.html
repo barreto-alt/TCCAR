@@ -114,7 +114,7 @@ tr.demitido:hover td { background: #f3f4f6 !important; }
 </head>
 <body>
 
-<div id="login-screen" class="show">
+<div id="login-screen">
   <div class="login-box">
     <h2>🏢 Gestão RH</h2>
     <p id="login-subtitle">Acesse com seu e-mail e senha</p>
@@ -964,12 +964,25 @@ async function confirmReset() {
 
 // ── INIT ──
 async function load() {
-  // verifica sessão existente
+  // tenta sessão existente no Supabase
   const { data: { session } } = await _sb.auth.getSession();
   if (session) {
     await onLogin(session.user);
+    return;
   }
-  // se não há sessão, a tela de login já está visível
+  // sem sessão: carrega do localStorage e renderiza direto
+  const cached = localStorage.getItem('tccar_meta');
+  if (cached) {
+    try {
+      const m = JSON.parse(cached);
+      if (Array.isArray(m.saldos) && m.saldos.length) SALDOS_DATA = m.saldos;
+      if (Array.isArray(m.carros) && m.carros.length) FAT_CARROS = m.carros;
+      if (Array.isArray(m.fat2026) && m.fat2026.length) FAT_2026 = m.fat2026;
+      if (Array.isArray(m.fluxo25) && m.fluxo25.length) FLUXO_2025 = m.fluxo25;
+      if (Array.isArray(m.fluxo26) && m.fluxo26.length) FLUXO_2026 = m.fluxo26;
+    } catch(e) {}
+  }
+  renderAll();
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1413,13 +1426,14 @@ let FAT_2026 = [
   {mes:'Mai',servicos:605163.99,produtos:85344.54},
   {mes:'Jun',servicos:615926.72,produtos:119979.61},
   {mes:'Jul',servicos:590195.39,produtos:130413.07},
-  {mes:'Ago',servicos:529610.12,produtos:107000.00},
+  {mes:'Ago',servicos:535118.04,produtos:107492.08},
+  {mes:'Set',servicos:585643.90,produtos:108276.66},
 ];
 const FAT_HIST = {
   '2023':[351663.45,291700.45,476714.13,350275.91,475250.91,369956.39,385513.33,410302.14,371167.36,402382.24,311602.96,312539.25],
   '2024':[256391.95,354279.78,432036.33,440813.69,441581.04,443533.62,452214.59,501375.24,440912.08,485822.09,421396.33,500058.55],
   '2025':[467081.85,524922.12,505485.00,501352.00,524344.00,506605.79,584296.68,574990.56,611880.87,654398.84,650953.20,618529.81],
-  '2026':[573151.20,662129.13,696308.64,734603.64,690508.53,735906.33,720608.46,636610.12,null,null,null,null]
+  '2026':[573151.20,662129.13,696308.64,734603.64,690508.53,735906.33,720608.46,642610.12,693920.56,null,null,null]
 };
 let FAT_CARROS = [
   {mes:'Jan',seguro:63,particular:63},
