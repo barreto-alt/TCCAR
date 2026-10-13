@@ -127,7 +127,7 @@ tr.demitido:hover td { background: #f3f4f6 !important; }
 <div id="loading-overlay"><div class="spinner"></div><p id="loading-msg">Carregando dados...</p></div>
 
 <header>
-  <h1 id="header-title">🚗 Dashboard RH</h1>
+  <h1 id="header-title">🚗 Dashboard TC CAR</h1>
   <div class="header-right">
     <span class="user-badge" id="user-badge"></span>
     <span id="save-ind" class="save-indicator">✓ Salvo</span>
@@ -146,6 +146,7 @@ tr.demitido:hover td { background: #f3f4f6 !important; }
   <div class="tab" onclick="showTab('saldos')">🏦 Saldos</div>
   <div class="tab" onclick="showTab('fluxo')">💵 Fluxo</div>
   <div class="tab" onclick="showTab('acoes')">🎯 Ações</div>
+  <div class="tab" onclick="showTab('cartoes')">💳 Cartões</div>
 </div>
 
 <!-- COLABORADORES -->
@@ -394,6 +395,54 @@ tr.demitido:hover td { background: #f3f4f6 !important; }
   </div>
 </div>
 
+<!-- CARTÕES -->
+<div id="tab-cartoes" class="content">
+<style>
+.cc-card{background:white;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.08);padding:16px 20px;margin-bottom:12px;border-left:5px solid #9ca3af;}
+.cc-header{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.cc-bandeira{width:42px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;color:white;flex-shrink:0;}
+.cc-nome{font-size:.92rem;font-weight:700;color:#1a1a2e;flex:1;}
+.cc-final{font-size:.78rem;color:#9ca3af;}
+.cc-titular{font-size:.72rem;color:#6b7280;margin-top:1px;}
+.cc-vals{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;}
+.cc-val-box{background:#f8f9fb;border-radius:8px;padding:8px 12px;}
+.cc-val-label{font-size:.68rem;color:#9ca3af;margin-bottom:2px;}
+.cc-val-num{font-size:.92rem;font-weight:700;color:#1a1a2e;}
+.cc-pending{opacity:.5;font-style:italic;}
+.cc-meses{margin-top:10px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.cc-mes-box{background:#f0f4ff;border-radius:6px;padding:6px 8px;text-align:center;}
+.cc-mes-label{font-size:.65rem;color:#6b7280;}
+.cc-mes-val{font-size:.79rem;font-weight:700;color:#185FA5;}
+</style>
+
+<div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap">
+  <div class="section-title" style="margin:0">💳 Cartões de Crédito</div>
+  <div style="margin-left:auto;font-size:.78rem;color:#9ca3af">Faturas out/26 · BB e BV pendentes</div>
+</div>
+
+<!-- KPIs -->
+<div class="kpi-row" style="margin-bottom:20px">
+  <div class="kpi" style="border-left-color:#ef4444"><div class="kpi-val" id="cc-total-fatura">—</div><div class="kpi-label">Faturas conhecidas (out)</div></div>
+  <div class="kpi" style="border-left-color:#f59e0b"><div class="kpi-val" id="cc-total-futuro">—</div><div class="kpi-label">Parcelas futuras (3 cartões)</div></div>
+  <div class="kpi" style="border-left-color:#3b82f6"><div class="kpi-val" id="cc-media-mensal">—</div><div class="kpi-label">Média mensal nov–dez</div></div>
+  <div class="kpi" style="border-left-color:#6b7280"><div class="kpi-val" id="cc-pendentes">2</div><div class="kpi-label">Cartões aguardando fatura</div></div>
+</div>
+
+<!-- Chart -->
+<div style="background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:16px;margin-bottom:20px">
+  <div style="font-size:.85rem;font-weight:700;color:#1a1a2e;margin-bottom:12px">Projeção de parcelas por mês (3 cartões conhecidos)</div>
+  <div style="height:200px;position:relative"><canvas id="chart-cartoes"></canvas></div>
+  <div style="display:flex;gap:16px;justify-content:center;margin-top:10px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:5px;font-size:.72rem"><div style="width:12px;height:12px;border-radius:2px;background:#003087"></div>Itaú</div>
+    <div style="display:flex;align-items:center;gap:5px;font-size:.72rem"><div style="width:12px;height:12px;border-radius:2px;background:#CC092F"></div>Bradesco</div>
+    <div style="display:flex;align-items:center;gap:5px;font-size:.72rem"><div style="width:12px;height:12px;border-radius:2px;background:#0066CC"></div>Porto Seguro</div>
+  </div>
+</div>
+
+<!-- Cards detail -->
+<div id="cc-lista"></div>
+</div>
+
 <!-- AÇÕES -->
 <div id="tab-acoes" class="content">
 <style>
@@ -610,8 +659,16 @@ function saveAcao(id,val){
   <div class="toolbar" style="margin-bottom:16px">
     <label style="font-size:.82rem;font-weight:600;color:#374151">Período:</label>
     <select class="fsel" id="fin-periodo" onchange="renderFinanceiro()">
-      <option value="media">Média Jan–Ago</option>
-      <option value="ago" selected>Agosto</option>
+      <option value="media">Média Jan–Set</option>
+      <option value="jan">Janeiro</option>
+      <option value="fev">Fevereiro</option>
+      <option value="mar">Março</option>
+      <option value="abr">Abril</option>
+      <option value="mai">Maio</option>
+      <option value="jun">Junho</option>
+      <option value="jul">Julho</option>
+      <option value="ago">Agosto</option>
+      <option value="set" selected>Setembro</option>
     </select>
   </div>
 
@@ -1356,38 +1413,39 @@ function addColab() {
 // ═══════════════════════════════════════════════════════════════════
 function importarUniformesChat(){
   const DADOS = [
-    {num:2,  calca:'G',  camisa:'GG', bota:''},
-    {num:3,  calca:'M',  camisa:'M',  bota:'38'},
-    {num:5,  calca:'M',  camisa:'M',  bota:'42'},
-    {num:6,  calca:'GG', camisa:'GG', bota:'43'},
-    {num:7,  calca:'GG', camisa:'GG', bota:''},
-    {num:11, calca:'M',  camisa:'G',  bota:'40'},
-    {num:13, calca:'G',  camisa:'G',  bota:''},
-    {num:14, calca:'G',  camisa:'G',  bota:'41'},
-    {num:15, calca:'M',  camisa:'M',  bota:''},
-    {num:16, calca:'P',  camisa:'M',  bota:'41'},
-    {num:17, calca:'G',  camisa:'G',  bota:'42'},
-    {num:18, calca:'GG', camisa:'G',  bota:'42'},
-    {num:19, calca:'M',  camisa:'M',  bota:''},
-    {num:23, calca:'G',  camisa:'G',  bota:'43'},
-    {num:24, calca:'G',  camisa:'G',  bota:''},
-    {num:25, calca:'P',  camisa:'P',  bota:'40'},
-    {num:28, calca:'G',  camisa:'G',  bota:'41'},
-    {num:31, calca:'M',  camisa:'GG', bota:'42'},
-    {num:32, calca:'G',  camisa:'',   bota:''},
-    {num:33, calca:'',   camisa:'',   bota:'40'},
-    {num:34, calca:'G',  camisa:'G',  bota:'40'},
-    {num:35, calca:'M',  camisa:'M',  bota:'39'},
-    {num:38, calca:'M',  camisa:'M',  bota:'42'},
-    {num:39, calca:'M',  camisa:'M',  bota:'39'},
-    {num:40, calca:'G',  camisa:'G',  bota:'43'},
-    {num:42, calca:'G',  camisa:'G',  bota:'43'},
-    {num:43, calca:'G',  camisa:'G',  bota:''},
-    {num:44, calca:'',   camisa:'GG', bota:'42'},
+    {nome:'ALEXANDRE',                          calca:'G',   camisa:'',   bota:''},
+    {nome:'ALISSON OLIVEIRA DOS SANTOS',        calca:'G',   camisa:'G',  bota:'43'},
+    {nome:'ANTONIO (POLIDOR)',                  calca:'M',   camisa:'M',  bota:'39'},
+    {nome:'ANTONIO TONINHO',                    calca:'G',   camisa:'G',  bota:'41'},
+    {nome:'BRUNO HENRIQUE FELIZARDO DOS SANTOS',calca:'M',   camisa:'M',  bota:'42'},
+    {nome:'CRISTOPHER',                         calca:'GG',  camisa:'G',  bota:'42'},
+    {nome:'ERIC OLIVEIRA DA SILVA',             calca:'G',   camisa:'G',  bota:''},
+    {nome:'FELIPE NARDES OLIVEIRA',             calca:'M',   camisa:'M',  bota:'38'},
+    {nome:'GABRIEL ALBUQUERQUE SILVA',          calca:'P',   camisa:'M',  bota:'41'},
+    {nome:'HUDSON LUIZ OLIVEIRA CASTRO',        calca:'G',   camisa:'G',  bota:'43'},
+    {nome:'JACKSON',                            calca:'G',   camisa:'G',  bota:'43'},
+    {nome:'JADSON',                             calca:'G',   camisa:'G',  bota:''},
+    {nome:'JOAO PAULO',                         calca:'M',   camisa:'M',  bota:''},
+    {nome:'JOSÉ APARECIDO',                     calca:'M',   camisa:'G',  bota:'40'},
+    {nome:'LUIS MILLER AGUILAR DE OLIVEIRA',    calca:'G',   camisa:'G',  bota:''},
+    {nome:'MARCILIO SOUZA DOS SANTOS',          calca:'G',   camisa:'GG', bota:''},
+    {nome:'MATEUS',                             calca:'G',   camisa:'G',  bota:'40'},
+    {nome:'MATHEUS PETILIO BORGES',             calca:'M',   camisa:'M',  bota:'42'},
+    {nome:'MATHEUS RUAS',                       calca:'M',   camisa:'M',  bota:'39'},
+    {nome:'NICOLLAS',                           calca:'M',   camisa:'GG', bota:'42'},
+    {nome:'PAULO CESAR SANTANA DA SILVA',       calca:'',    camisa:'',   bota:'40'},
+    {nome:'RAFAEL',                             calca:'P',   camisa:'P',  bota:'40'},
+    {nome:'ROOSEVELT CHINA',                    calca:'GG',  camisa:'GG', bota:'43'},
+    {nome:'SEBASTIAO GONCALO DOS SANTOS',       calca:'GG',  camisa:'GG', bota:''},
+    {nome:'TIAGO HIDEKI YOGUI',                 calca:'M',   camisa:'M',  bota:''},
+    {nome:'VALDOMIRO RICARDO DA SILVA FILHO',   calca:'G',   camisa:'G',  bota:'42'},
+    {nome:'WAGNER MARCULO',                     calca:'',    camisa:'GG', bota:'42'},
+    {nome:'WASHINGTON SILVA GERMANO FILHO',     calca:'G',   camisa:'G',  bota:'41'},
   ];
   let atualizados=0;
   DADOS.forEach(d=>{
-    const idx=COLABS.findIndex(c=>c.num===d.num);
+    const busca=d.nome.toLowerCase();
+    const idx=COLABS.findIndex(c=>c.nome&&c.nome.toLowerCase().includes(busca.split(' ')[0])&&c.nome.toLowerCase().includes(busca.split(' ')[busca.split(' ').length-1]));
     if(idx>=0){
       if(!COLABS[idx].uniformes) COLABS[idx].uniformes={calca:'',camisa:'',bota:'',oculos:false,luva:false,abafador:false};
       if(d.calca) COLABS[idx].uniformes.calca=d.calca;
@@ -1397,7 +1455,7 @@ function importarUniformesChat(){
     }
   });
   save(); renderUniformes();
-  alert(`✅ ${atualizados} colaboradores atualizados com tamanhos do WhatsApp!`);
+  alert(`✅ ${atualizados} colaboradores atualizados!`);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1936,7 +1994,8 @@ function renderSaldos(){
 // ═══════════════════════════════════════════════════════════════════
 // FINANCEIRO DATA
 // ═══════════════════════════════════════════════════════════════════
-const FIN_RECEITA = {media:662706.97, ago:670623.78};
+// Receita mensal = FAT_2026 servicos+produtos (calculado dinamicamente em renderFinanceiro)
+const FIN_RECEITA = {media:662706.97, jan:573151.20, fev:662129.13, mar:696308.64, abr:734603.64, mai:690508.53, jun:735906.33, jul:720608.46, ago:642610.12, set:693920.56};
 const FIN_CATS = [
   {nome:'Pessoal', media:218125.82, ago:195087.92, itens:[
     {nome:'Salários',media:57800.95,ago:64761.31},
@@ -2046,10 +2105,45 @@ const FIN_CATS = [
 let _chartFin=null;
 const FIN_OPEN = {};
 
+const FLUXO_MES_MAP = {
+  'Pessoal':['4.03 Despesas com Salários e Encargos','4.04 Despesas com Colaboradores','PAGAMENTO AVULSO FUNCIONARIO'],
+  'Cartão empresarial':['CARTAO DE CREDITO EMPRESARIAL'],
+  'Vendas e serviços':['4.02 Despesas com Vendas e Serviços'],
+  'Diretoria':['4.09 Despesas com Diretoria'],
+  'Imóvel':['4.07 Despesas com Imóvel'],
+  'Empréstimos':['5.02 Empréstimos e Financiamentos'],
+  'Impostos s/ vendas':['4.01 Impostos sobre Vendas e sobre Serviços'],
+  'Comercial':['4.06 Despesas Comerciais'],
+  'Bens imobilizados':['5.01 Bens Imobilizados da Empresa'],
+  'Administrativas':['4.05 Despesas Administrativas'],
+  'Consórcio':['consorcio'],
+  'Financeiras':['4.10 Despesas Financeiras'],
+  'Devoluções':['DEVOLUÇÃO'],
+  'Fretes':['FRETE','Fretes pagos'],
+  'Outras despesas':['4.11 Outras Despesas'],
+  'Taxa municipal':['TAXA DE LICENÇA PREFEITURA'],
+  'Veículos':['4.08 Despesas com Veículos'],
+};
+const FLUXO_MES_IDX = {jan:0,fev:1,mar:2,abr:3,mai:4,jun:5,jul:6,ago:7};
+
+function finFluxo(names, mi) {
+  let sum = 0;
+  FLUXO_2026.forEach(r => { if(names.includes(r.n) && r.v[mi]!==undefined) sum += Math.abs(r.v[mi]); });
+  return sum;
+}
+function getFinCatVal(cat, per) {
+  if(per==='media'||per==='ago') return cat[per]||0;
+  const mi = FLUXO_MES_IDX[per];
+  if(mi===undefined) return cat.media||0;
+  const keys = FLUXO_MES_MAP[cat.nome];
+  return keys ? finFluxo(keys, mi) : 0;
+}
+
 function renderFinanceiro(){
   const per = document.getElementById('fin-periodo')?.value||'ago';
   const rec = FIN_RECEITA[per];
-  const tot = FIN_CATS.reduce((s,c)=>s+c[per],0);
+  const hasMesDetail = (per==='media'||per==='ago');
+  const tot = FIN_CATS.reduce((s,c)=>s+getFinCatVal(c,per),0);
   const res = rec - tot;
 
   document.getElementById('kf-receita').textContent = brlk(rec);
@@ -2060,12 +2154,24 @@ function renderFinanceiro(){
   resCard.style.borderLeftColor = res<0?'#ef4444':'#10b981';
   document.getElementById('kf-resultado').style.color = res<0?'#ef4444':'#10b981';
 
+  // Nota para Set (sem FLUXO mensal)
+  let notaEl = document.getElementById('fin-nota-set');
+  if(!notaEl){
+    notaEl=document.createElement('div');
+    notaEl.id='fin-nota-set';
+    notaEl.style.cssText='font-size:.78rem;color:#9ca3af;margin:-4px 0 8px;font-style:italic';
+    document.getElementById('fin-accordions')?.before?.(notaEl);
+    document.getElementById('kf-res-card')?.parentNode?.insertBefore(notaEl, document.getElementById('kf-res-card')?.nextSibling);
+  }
+  notaEl.textContent = (per==='set') ? '⚠ Despesas de setembro ainda não lançadas no fluxo — valores mostrados são a média Jan-Ago.' : '';
+  notaEl.style.display = (per==='set') ? 'block' : 'none';
+
   // Accordions
   const acc = document.getElementById('fin-accordions');
   acc.innerHTML='';
-  const sorted = [...FIN_CATS].sort((a,b)=>b[per]-a[per]);
+  const sorted = [...FIN_CATS].sort((a,b)=>getFinCatVal(b,per)-getFinCatVal(a,per));
   sorted.forEach(cat=>{
-    const val=cat[per]; const pct_rec=((val/rec)*100).toFixed(1);
+    const val=getFinCatVal(cat,per); const pct_rec=((val/rec)*100).toFixed(1);
     const key=cat.nome;
     const wrap=document.createElement('div');
     wrap.style.cssText='background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:10px;overflow:hidden';
@@ -2079,15 +2185,21 @@ function renderFinanceiro(){
     body.style.display=FIN_OPEN[key]?'block':'none';
     const tbl=document.createElement('table');
     tbl.style.cssText='width:100%;font-size:.79rem;border-collapse:collapse';
-    cat.itens.forEach(item=>{
-      const v=item[per]; if(v===0&&per==='ago'){/* show zeroes */}
-      const pr=rec>0?((v/rec)*100).toFixed(2):'0.00';
+    if(hasMesDetail) {
+      cat.itens.forEach(item=>{
+        const v=item[per]||0;
+        const pr=rec>0?((v/rec)*100).toFixed(2):'0.00';
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td style="padding:6px 14px;color:#374151;border-bottom:0.5px solid #f0f2f5">${item.nome}</td>
+          <td style="padding:6px 14px;text-align:right;color:#6b7280;border-bottom:0.5px solid #f0f2f5">${pr}%</td>
+          <td style="padding:6px 14px;text-align:right;font-weight:600;border-bottom:0.5px solid #f0f2f5;${v===0?'color:#d1d5db':''}">${brl(v)}</td>`;
+        tbl.appendChild(tr);
+      });
+    } else {
       const tr=document.createElement('tr');
-      tr.innerHTML=`<td style="padding:6px 14px;color:#374151;border-bottom:0.5px solid #f0f2f5">${item.nome}</td>
-        <td style="padding:6px 14px;text-align:right;color:#6b7280;border-bottom:0.5px solid #f0f2f5">${pr}%</td>
-        <td style="padding:6px 14px;text-align:right;font-weight:600;border-bottom:0.5px solid #f0f2f5;${v===0?'color:#d1d5db':''}">${brl(v)}</td>`;
+      tr.innerHTML=`<td colspan="3" style="padding:8px 14px;color:#9ca3af;font-style:italic;font-size:.77rem;border-bottom:0.5px solid #f0f2f5">Detalhamento por rubrica disponível apenas para média e agosto</td>`;
       tbl.appendChild(tr);
-    });
+    }
     body.appendChild(tbl);
     header.onclick=()=>{FIN_OPEN[key]=!FIN_OPEN[key];renderFinanceiro();};
     wrap.appendChild(header); wrap.appendChild(body);
@@ -2103,7 +2215,7 @@ function renderFinanceiro(){
     const colors=['#185FA5','#e94560','#1D9E75','#BA7517','#533AB7','#D85A30','#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444','#6b7280'];
     _chartFin=new Chart(c,{type:'bar',data:{
       labels:top.map(c=>c.nome),
-      datasets:[{label:'R$',data:top.map(c=>c[per]),backgroundColor:colors,borderRadius:4}]
+      datasets:[{label:'R$',data:top.map(c=>getFinCatVal(c,per)),backgroundColor:colors,borderRadius:4}]
     },options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+brl(ctx.raw)}}},
       scales:{x:{ticks:{callback:v=>brlk(v)},grid:{color:'#e0e4ef'}},y:{grid:{display:false},ticks:{font:{size:11}}}}}});
@@ -2111,7 +2223,7 @@ function renderFinanceiro(){
 }
 
 function showTab(tab) {
-  ['colab','pcmso','ferias','uniformes','faturamento','financeiro','saldos','fluxo','acoes'].forEach((t,i)=>{
+  ['colab','pcmso','ferias','uniformes','faturamento','financeiro','saldos','fluxo','acoes','cartoes'].forEach((t,i)=>{
     document.querySelectorAll('.tab')[i].classList.toggle('active',t===tab);
     document.getElementById('tab-'+t).classList.toggle('active',t===tab);
   });
@@ -2120,6 +2232,138 @@ function showTab(tab) {
   if(tab==='saldos') renderSaldos();
   if(tab==='fluxo') renderFluxo();
   if(tab==='acoes') renderAcoes();
+  if(tab==='cartoes') renderCartoes();
+}
+
+// ─── CARTÕES ──────────────────────────────────────────────────────────────────
+const CARTOES = [
+  {
+    nome:'Itaú Empresas', final:'5385', titular:'TC CAR (5385) + Tarciso (1905)',
+    bandeira:'VISA', cor:'#003087',
+    fatura: 44923.75, mes_fatura:'Out/26',
+    // parcelas futuras a partir de Nov/26
+    futuros:{Nov:42512.96, Dez:42415.08, Jan:40361.54, Fev:30413.79, Mar:18308.20, Abr:18247.10, Mai:9247.10, Jun:9247.10, Jul:2260.86},
+    total_futuro: 213013.73,
+    destaques:[
+      'Tubarão Tintas (abr/jun/ago): R$24.711 em parcelas/mês até fev/27',
+      'RR Auto Peças 01/10: R$2.014/mês até jul/27',
+      'Bela Tintas 4/12: R$1.667/mês até jun/27',
+      'Tarciso — Land Puxadores 1/4: R$2.448/mês (nov–jan)',
+    ]
+  },
+  {
+    nome:'Bradesco', final:'4633', titular:'NICOLLE C LOPEZ – ELO',
+    bandeira:'ELO', cor:'#CC092F',
+    fatura: 67940.19, mes_fatura:'Set/26',
+    // Out em diante (fatura set já fechada, Out é próxima)
+    futuros:{Out:50873.90, Nov:36588.66, Dez:23732.23, Jan:16990.92, Fev:12497.65, Mar:11030.82, Abr:10245.89, Mai:4338.52},
+    total_futuro: 166298.59,
+    destaques:[
+      '100+ itens parcelados em aberto — alta pulverização',
+      'LJ DO MEC 3/12: R$737/mês até set/27',
+      '4S Comercio Blindagem 1/10: R$1.700/mês até jun/27',
+      'ZP Thiago 1/6: R$870/mês até fev/27',
+    ]
+  },
+  {
+    nome:'Porto Seguro', final:'119', titular:'TARCISO C M LOPEZ',
+    bandeira:'VISA', cor:'#0066CC',
+    fatura: 66918.78, mes_fatura:'Out/26',
+    futuros:{Nov:45263.05, Dez:35322.16, 'Jan–Jul':81037.40},
+    total_futuro: 161622.61,
+    destaques:[
+      'RR Auto Peças: recorrente em múltiplas faturas',
+      'Tubarão Tintas: múltiplas parcelas ativas',
+      'JIM COM Diego 3/10 (R$1.290): parcelas até ago/27',
+      'Europa Motors 4/5 (R$4.115): parcela final nov/26',
+    ]
+  },
+  {nome:'Banco do Brasil', final:'????', titular:'Pendente', bandeira:'BB', cor:'#FFCC00', fatura:null, mes_fatura:null, futuros:{}, total_futuro:null, destaques:[]},
+  {nome:'BV', final:'????', titular:'Pendente', bandeira:'BV', cor:'#00B0F0', fatura:null, mes_fatura:null, futuros:{}, total_futuro:null, destaques:[]},
+];
+
+let _chartCC=null;
+function renderCartoes(){
+  // KPIs
+  const known = CARTOES.filter(c=>c.fatura!==null);
+  const totalFat = known.reduce((s,c)=>s+c.fatura,0);
+  const totalFut = known.reduce((s,c)=>s+(c.total_futuro||0),0);
+  // média nov+dez
+  const novItau=42512.96, novBrad=36588.66, novPorto=45263.05;
+  const dezItau=42415.08, dezBrad=23732.23, dezPorto=35322.16;
+  const media = ((novItau+novBrad+novPorto)+(dezItau+dezBrad+dezPorto))/2;
+
+  document.getElementById('cc-total-fatura').textContent = brlk(totalFat);
+  document.getElementById('cc-total-futuro').textContent = 'R$'+(totalFut/1000).toFixed(0)+'k';
+  document.getElementById('cc-media-mensal').textContent = brlk(media);
+
+  // Cards list
+  const lista = document.getElementById('cc-lista');
+  lista.innerHTML = CARTOES.map(c=>{
+    if(!c.fatura) return `
+      <div class="cc-card cc-pending" style="border-left-color:${c.cor}">
+        <div class="cc-header">
+          <div class="cc-bandeira" style="background:${c.cor}">${c.bandeira}</div>
+          <div><div class="cc-nome">${c.nome} ···· ${c.final}</div><div class="cc-titular">Aguardando fatura</div></div>
+        </div>
+        <div style="font-size:.8rem;color:#9ca3af">Envie a fatura em PDF para incluir nesta análise</div>
+      </div>`;
+    const mesesKeys = Object.keys(c.futuros);
+    const mesesHtml = mesesKeys.map(m=>`
+      <div class="cc-mes-box">
+        <div class="cc-mes-label">${m}</div>
+        <div class="cc-mes-val">${brlk(c.futuros[m])}</div>
+      </div>`).join('');
+    const destaquesHtml = c.destaques.map(d=>`<li style="margin-bottom:3px">${d}</li>`).join('');
+    return `
+      <div class="cc-card" style="border-left-color:${c.cor}">
+        <div class="cc-header">
+          <div class="cc-bandeira" style="background:${c.cor}">${c.bandeira}</div>
+          <div style="flex:1">
+            <div class="cc-nome">${c.nome} <span class="cc-final">···· ${c.final}</span></div>
+            <div class="cc-titular">${c.titular}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:.72rem;color:#9ca3af">Fatura ${c.mes_fatura}</div>
+            <div style="font-size:1.05rem;font-weight:800;color:#ef4444">${brl(c.fatura)}</div>
+          </div>
+        </div>
+        <div class="cc-vals">
+          <div class="cc-val-box">
+            <div class="cc-val-label">Parcelas futuras totais</div>
+            <div class="cc-val-num" style="color:#f59e0b">${brl(c.total_futuro)}</div>
+          </div>
+          <div class="cc-val-box">
+            <div class="cc-val-label">Próximo mês estimado</div>
+            <div class="cc-val-num" style="color:#185FA5">${brlk(Object.values(c.futuros)[0]||0)}</div>
+          </div>
+        </div>
+        <div style="font-size:.75rem;font-weight:700;color:#6b7280;margin:10px 0 4px">Parcelas por mês</div>
+        <div class="cc-meses">${mesesHtml}</div>
+        ${c.destaques.length?`
+        <div style="font-size:.75rem;font-weight:700;color:#6b7280;margin:10px 0 4px">Destaques</div>
+        <ul style="font-size:.78rem;color:#374151;margin:0;padding-left:18px;line-height:1.7">${destaquesHtml}</ul>`:''}
+      </div>`;
+  }).join('');
+
+  // Chart
+  setTimeout(()=>{
+    const c=document.getElementById('chart-cartoes');
+    if(!c||c.offsetParent===null) return;
+    if(_chartCC) _chartCC.destroy();
+    const labels=['Nov/26','Dez/26','Jan/27','Fev/27','Mar/27','Abr/27'];
+    const itau  =[42512.96,42415.08,40361.54,30413.79,18308.20,18247.10];
+    const brad  =[36588.66,23732.23,16990.92,12497.65,11030.82,10245.89];
+    const porto =[45263.05,35322.16,27012.47,27012.47,27012.47,0]; // demais distribuídos
+    _chartCC=new Chart(c,{type:'bar',data:{labels,datasets:[
+      {label:'Itaú',data:itau,backgroundColor:'#003087',borderRadius:3},
+      {label:'Bradesco',data:brad,backgroundColor:'#CC092F',borderRadius:3},
+      {label:'Porto',data:porto,backgroundColor:'#0066CC',borderRadius:3},
+    ]},options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+brl(ctx.raw)}}},
+      scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:11}}},
+              y:{stacked:true,ticks:{callback:v=>brlk(v)},grid:{color:'#e0e4ef'}}}}});
+  },50);
 }
 
 load(); // renderAll() é chamado dentro do load()
