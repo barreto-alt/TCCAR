@@ -659,7 +659,7 @@ function saveAcao(id,val){
   <div class="toolbar" style="margin-bottom:16px">
     <label style="font-size:.82rem;font-weight:600;color:#374151">Período:</label>
     <select class="fsel" id="fin-periodo" onchange="renderFinanceiro()">
-      <option value="media">Média Jan–Set</option>
+      <option value="media">Média Jan–Ago</option>
       <option value="jan">Janeiro</option>
       <option value="fev">Fevereiro</option>
       <option value="mar">Março</option>
@@ -667,8 +667,7 @@ function saveAcao(id,val){
       <option value="mai">Maio</option>
       <option value="jun">Junho</option>
       <option value="jul">Julho</option>
-      <option value="ago">Agosto</option>
-      <option value="set" selected>Setembro</option>
+      <option value="ago" selected>Agosto</option>
     </select>
   </div>
 
@@ -1995,7 +1994,7 @@ function renderSaldos(){
 // FINANCEIRO DATA
 // ═══════════════════════════════════════════════════════════════════
 // Receita mensal = FAT_2026 servicos+produtos (calculado dinamicamente em renderFinanceiro)
-const FIN_RECEITA = {media:662706.97, jan:573151.20, fev:662129.13, mar:696308.64, abr:734603.64, mai:690508.53, jun:735906.33, jul:720608.46, ago:642610.12, set:693920.56};
+const FIN_RECEITA = {media:662706.97, jan:573151.20, fev:662129.13, mar:696308.64, abr:734603.64, mai:690508.53, jun:735906.33, jul:720608.46, ago:642610.12};
 const FIN_CATS = [
   {nome:'Pessoal', media:218125.82, ago:195087.92, itens:[
     {nome:'Salários',media:57800.95,ago:64761.31},
