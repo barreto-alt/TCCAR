@@ -963,7 +963,13 @@ async function onLogin(user) {
     COLABS = row.dados;
     if (row.nome) document.getElementById('header-title').textContent = '🚗 ' + row.nome;
     if (row.meta) {
-      if (Array.isArray(row.meta.saldos) && row.meta.saldos.length) SALDOS_DATA = row.meta.saldos;
+      if (Array.isArray(row.meta.saldos) && row.meta.saldos.length) {
+        const _def = SALDOS_DATA; // entradas hardcoded do HTML
+        SALDOS_DATA = row.meta.saldos;
+        // Append entradas do HTML que são mais recentes que o último do Supabase
+        const lastCloud = SALDOS_DATA[SALDOS_DATA.length-1]?.data;
+        _def.forEach(e => { if(e.data !== lastCloud && !SALDOS_DATA.find(s=>s.data===e.data)) SALDOS_DATA.push(e); });
+      }
       if (Array.isArray(row.meta.carros) && row.meta.carros.length) FAT_CARROS = row.meta.carros;
       if (Array.isArray(row.meta.fat2026) && row.meta.fat2026.length) FAT_2026 = row.meta.fat2026;
       if (Array.isArray(row.meta.fluxo25) && row.meta.fluxo25.length) FLUXO_2025 = row.meta.fluxo25;
