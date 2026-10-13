@@ -116,10 +116,9 @@ tr.demitido:hover td { background: #f3f4f6 !important; }
 
 <div id="login-screen">
   <div class="login-box">
-    <h2>🏢 Gestão RH</h2>
-    <p id="login-subtitle">Acesse com seu e-mail e senha</p>
-    <div class="login-field" id="field-email"><label>E-mail</label><input type="email" id="login-email" placeholder="seu@email.com"></div>
-    <div class="login-field"><label>Senha</label><input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <h2>🚗 TC CAR</h2>
+    <p id="login-subtitle">Digite sua senha para acessar</p>
+    <div class="login-field"><label>Senha</label><input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" autofocus></div>
     <button class="btn-login" onclick="doLogin()">Entrar</button>
     <div class="login-err" id="login-err"></div>
   </div>
@@ -885,15 +884,13 @@ function showInd(ok) {
 })();
 
 async function doLogin() {
-  const emailField = document.getElementById('login-email').value.trim();
-  const email = window._clientEmail || emailField;
   const pass  = document.getElementById('login-pass').value;
   const errEl = document.getElementById('login-err');
   errEl.textContent = '';
-  if (!email || !pass) { errEl.textContent = 'Preencha e-mail e senha.'; return; }
+  if (!pass) { errEl.textContent = 'Digite a senha.'; return; }
   const btn = document.querySelector('.btn-login');
   btn.textContent = 'Entrando...'; btn.disabled = true;
-  const { data, error } = await _sb.auth.signInWithPassword({ email, password: pass });
+  const { data, error } = await _sb.auth.signInWithPassword({ email: 'barreto@gestaoessencial.com', password: pass });
   btn.textContent = 'Entrar'; btn.disabled = false;
   if (error) { errEl.textContent = 'Senha incorreta.'; return; }
   await onLogin(data.user);
@@ -970,19 +967,8 @@ async function load() {
     await onLogin(session.user);
     return;
   }
-  // sem sessão: carrega do localStorage e renderiza direto
-  const cached = localStorage.getItem('tccar_meta');
-  if (cached) {
-    try {
-      const m = JSON.parse(cached);
-      if (Array.isArray(m.saldos) && m.saldos.length) SALDOS_DATA = m.saldos;
-      if (Array.isArray(m.carros) && m.carros.length) FAT_CARROS = m.carros;
-      if (Array.isArray(m.fat2026) && m.fat2026.length) FAT_2026 = m.fat2026;
-      if (Array.isArray(m.fluxo25) && m.fluxo25.length) FLUXO_2025 = m.fluxo25;
-      if (Array.isArray(m.fluxo26) && m.fluxo26.length) FLUXO_2026 = m.fluxo26;
-    } catch(e) {}
-  }
-  renderAll();
+  // sem sessão: mostra tela de senha
+  document.getElementById('login-screen').classList.add('show');
 }
 
 // ═══════════════════════════════════════════════════════════════════
