@@ -337,10 +337,10 @@ tr.demitido:hover td { background: #f3f4f6 !important; }
 
   <div class="section-title" style="margin-top:24px">Volume de carros atendidos — 2026</div>
   <div class="kpi-row" style="margin-bottom:16px">
-    <div class="kpi green"><div class="kpi-val">951</div><div class="kpi-label">Total carros (Jan–Ago)</div></div>
-    <div class="kpi blue"><div class="kpi-val">119</div><div class="kpi-label">Média mensal</div></div>
-    <div class="kpi purple"><div class="kpi-val">627</div><div class="kpi-label">Seguro (66%)</div></div>
-    <div class="kpi orange"><div class="kpi-val">234</div><div class="kpi-label">Particular (34% excl. jan)</div></div>
+    <div class="kpi green"><div class="kpi-val">1.052</div><div class="kpi-label">Total carros (Jan–Set)</div></div>
+    <div class="kpi blue"><div class="kpi-val">117</div><div class="kpi-label">Média mensal</div></div>
+    <div class="kpi purple"><div class="kpi-val">796</div><div class="kpi-label">Seguro (76%)</div></div>
+    <div class="kpi orange"><div class="kpi-val">256</div><div class="kpi-label">Particular (24%)</div></div>
   </div>
   <div class="table-wrap" style="padding:16px;margin-bottom:20px">
     <div style="position:relative;width:100%;height:260px">
@@ -1486,7 +1486,8 @@ let FAT_CARROS = [
   {mes:'Mai',seguro:88,particular:24},
   {mes:'Jun',seguro:79,particular:24},
   {mes:'Jul',seguro:93,particular:21},
-  {mes:'Ago',seguro:93,particular:25},
+  {mes:'Ago',seguro:93,particular:26},
+  {mes:'Set',seguro:79,particular:21},
 ];
 let _chartAnos=null, _chart2026=null, _chartCarros=null;
 
@@ -2248,6 +2249,16 @@ const CARTOES = [
       'RR Auto Peças 01/10: R$2.014/mês até jul/27',
       'Bela Tintas 4/12: R$1.667/mês até jun/27',
       'Tarciso — Land Puxadores 1/4: R$2.448/mês (nov–jan)',
+    ],
+    categorias:[
+      {nome:'Tintas / Funilaria', val:26378},
+      {nome:'Equipamentos / Cabines', val:7500},
+      {nome:'Decoração / Estrutura', val:3740},
+      {nome:'Publicidade', val:2058},
+      {nome:'Peças / Auto Peças', val:2336},
+      {nome:'Fornecedores / Mecânica', val:2125},
+      {nome:'Serviços Profissionais', val:500},
+      {nome:'Uniformes / Higiene', val:288},
     ]
   },
   {
@@ -2262,6 +2273,27 @@ const CARTOES = [
       'LJ DO MEC 3/12: R$737/mês até set/27',
       '4S Comercio Blindagem 1/10: R$1.700/mês até jun/27',
       'ZP Thiago 1/6: R$870/mês até fev/27',
+    ],
+    categorias:[
+      {nome:'Decoração / Estrutura', val:12301},
+      {nome:'Mercado Livre', val:11413},
+      {nome:'Peças / Auto Peças', val:9248},
+      {nome:'Outros', val:6278},
+      {nome:'Tintas / Funilaria', val:4556},
+      {nome:'Fornecedores / Mecânica', val:4379},
+      {nome:'Retífica / Motores', val:3731},
+      {nome:'Serviços Profissionais', val:3205},
+      {nome:'Pneus', val:2569},
+      {nome:'Lubrificantes', val:2330},
+      {nome:'Lava Rápido', val:1514},
+      {nome:'Publicidade / Assinatura', val:1228},
+      {nome:'Viagem / Transporte', val:1185},
+      {nome:'Uniformes / Higiene', val:1136},
+      {nome:'Tecnologia / Software', val:1113},
+      {nome:'Elétrica / Hidráulica', val:996},
+      {nome:'Combustível', val:343},
+      {nome:'Alimentação', val:276},
+      {nome:'Farmácia', val:143},
     ]
   },
   {
@@ -2275,10 +2307,22 @@ const CARTOES = [
       'Tubarão Tintas: múltiplas parcelas ativas',
       'JIM COM Diego 3/10 (R$1.290): parcelas até ago/27',
       'Europa Motors 4/5 (R$4.115): parcela final nov/26',
+    ],
+    categorias:[
+      {nome:'Tintas / Funilaria', val:17292},
+      {nome:'Fornecedores / Mecânica', val:12941},
+      {nome:'Mercado Livre / Online', val:10518},
+      {nome:'Peças / Auto Peças', val:9991},
+      {nome:'Consórcio Porto', val:6932},
+      {nome:'Materiais / Estrutura', val:3216},
+      {nome:'Serviços / Outros', val:2643},
+      {nome:'Cabines / Estrutura', val:2208},
+      {nome:'Uniformes / Higiene', val:506},
+      {nome:'Seguro Auto', val:380},
+      {nome:'Combustível', val:136},
+      {nome:'Outros', val:423},
     ]
   },
-  {nome:'Banco do Brasil', final:'????', titular:'Pendente', bandeira:'BB', cor:'#FFCC00', fatura:null, mes_fatura:null, futuros:{}, total_futuro:null, destaques:[]},
-  {nome:'BV', final:'????', titular:'Pendente', bandeira:'BV', cor:'#00B0F0', fatura:null, mes_fatura:null, futuros:{}, total_futuro:null, destaques:[]},
 ];
 
 let _chartCC=null;
@@ -2342,6 +2386,23 @@ function renderCartoes(){
         ${c.destaques.length?`
         <div style="font-size:.75rem;font-weight:700;color:#6b7280;margin:10px 0 4px">Destaques</div>
         <ul style="font-size:.78rem;color:#374151;margin:0;padding-left:18px;line-height:1.7">${destaquesHtml}</ul>`:''}
+        ${(c.categorias&&c.categorias.length)?`
+        <div style="font-size:.75rem;font-weight:700;color:#6b7280;margin:12px 0 6px">Categorias da fatura</div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          ${(()=>{const tot=c.categorias.reduce((s,x)=>s+x.val,0);
+            const maxV=Math.max(...c.categorias.map(x=>x.val));
+            return c.categorias.slice().sort((a,b)=>b.val-a.val).map(x=>{
+              const pct=Math.round(x.val/tot*100);
+              const barW=Math.round(x.val/maxV*100);
+              return `<div style="display:flex;align-items:center;gap:8px;font-size:.76rem">
+                <div style="width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#374151;flex-shrink:0">${x.nome}</div>
+                <div style="flex:1;background:#e5e7eb;border-radius:3px;height:8px;overflow:hidden">
+                  <div style="width:${barW}%;background:${c.cor};height:100%;border-radius:3px;opacity:.8"></div>
+                </div>
+                <div style="width:56px;text-align:right;color:#185FA5;font-weight:600">${brlk(x.val)}</div>
+                <div style="width:30px;text-align:right;color:#9ca3af">${pct}%</div>
+              </div>`;}).join('');})()}
+        </div>`:''}
       </div>`;
   }).join('');
 
