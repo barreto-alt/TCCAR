@@ -2136,7 +2136,7 @@ const FLUXO_MES_MAP = {
   'Taxa municipal':['TAXA DE LICENÇA PREFEITURA'],
   'Veículos':['4.08 Despesas com Veículos'],
 };
-const FLUXO_MES_IDX = {jan:0,fev:1,mar:2,abr:3,mai:4,jun:5,jul:6,ago:7};
+const FLUXO_MES_IDX = {jan:0,fev:1,mar:2,abr:3,mai:4,jun:5,jul:6,ago:7,set:8,out:9};
 
 function finFluxo(names, mi) {
   let sum = 0;
@@ -2154,7 +2154,7 @@ function getFinCatVal(cat, per) {
 function renderFinanceiro(){
   const per = document.getElementById('fin-periodo')?.value||'ago';
   const rec = FIN_RECEITA[per];
-  const hasMesDetail = (per==='media'||per==='ago');
+  const hasMesDetail = (per in {media:1,jan:1,fev:1,mar:1,abr:1,mai:1,jun:1,jul:1,ago:1,set:1,out:1});
   const tot = FIN_CATS.reduce((s,c)=>s+getFinCatVal(c,per),0);
   const res = rec - tot;
 
@@ -2250,7 +2250,7 @@ function showTab(tab) {
 // ─── CARTÕES ──────────────────────────────────────────────────────────────────
 const CARTOES = [
   {
-    nome:'Itaú Empresas', final:'5385', titular:'TC CAR (5385) + Tarciso (1905)',
+    nome:'Itaú Empresas', final:'5385', titular:'TC CAR (5385) + Tarciso (1905)', venc:20,
     bandeira:'VISA', cor:'#003087',
     fatura: 44923.75, mes_fatura:'Out/26',
     // parcelas futuras a partir de Nov/26
@@ -2274,7 +2274,7 @@ const CARTOES = [
     ]
   },
   {
-    nome:'Bradesco', final:'4633', titular:'NICOLLE C LOPEZ – ELO',
+    nome:'Bradesco', final:'4633', titular:'NICOLLE C LOPEZ – ELO', venc:25,
     bandeira:'ELO', cor:'#CC092F',
     fatura: 67940.19, mes_fatura:'Set/26',
     // Out em diante (fatura set já fechada, Out é próxima)
@@ -2309,7 +2309,7 @@ const CARTOES = [
     ]
   },
   {
-    nome:'Porto Seguro', final:'119', titular:'TARCISO C M LOPEZ',
+    nome:'Porto Seguro', final:'119', titular:'TARCISO C M LOPEZ', venc:10,
     bandeira:'VISA', cor:'#0066CC',
     fatura: 66918.78, mes_fatura:'Out/26',
     futuros:{Nov:45263.05, Dez:35322.16, 'Jan–Jul':81037.40},
@@ -2334,6 +2334,17 @@ const CARTOES = [
       {nome:'Combustível', val:136},
       {nome:'Outros', val:423},
     ]
+  },
+  {
+    nome:'Banco do Brasil', final:'—', titular:'TC CAR', venc:26,
+    bandeira:'VISA', cor:'#FFCC00',
+    fatura: 0, mes_fatura:'—',
+    futuros:{Nov:2500, Dez:2500, Jan:2500, Fev:2500, Mar:2500, Abr:2500},
+    total_futuro: 15000,
+    destaques:[
+      'Parcela 5/10 a 10/10 — R$2.500/mês (Nov/26–Abr/27)',
+    ],
+    categorias:[]
   },
 ];
 
@@ -2379,7 +2390,7 @@ function renderCartoes(){
             <div class="cc-titular">${c.titular}</div>
           </div>
           <div style="text-align:right">
-            <div style="font-size:.72rem;color:#9ca3af">Fatura ${c.mes_fatura}</div>
+            <div style="font-size:.72rem;color:#9ca3af">Fatura ${c.mes_fatura}${c.venc?` · vence dia <b>${c.venc}</b>`:''}</div>
             <div style="font-size:1.05rem;font-weight:800;color:#ef4444">${brl(c.fatura)}</div>
           </div>
         </div>
