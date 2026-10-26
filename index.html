@@ -2154,7 +2154,7 @@ function getFinCatVal(cat, per) {
 function renderFinanceiro(){
   const per = document.getElementById('fin-periodo')?.value||'ago';
   const rec = FIN_RECEITA[per];
-  const hasMesDetail = (per in {media:1,jan:1,fev:1,mar:1,abr:1,mai:1,jun:1,jul:1,ago:1,set:1,out:1});
+  const hasMesDetail = (per==='media'||per==='ago');
   const tot = FIN_CATS.reduce((s,c)=>s+getFinCatVal(c,per),0);
   const res = rec - tot;
 
