@@ -2009,7 +2009,7 @@ function renderSaldos(){
 // Receita mensal = FAT_2026 servicos+produtos (calculado dinamicamente em renderFinanceiro)
 const FIN_RECEITA = {media:649126.96, jan:489870.0, fev:703831.1, mar:713417.46, abr:667062.42, mai:653318.35, jun:748222.48, jul:642793.88, ago:670623.14, set:586134.29, out:615996.46};
 const FIN_CATS = [
-  {nome:'Pessoal', media:218125.82, ago:195087.92, itens:[
+  {nome:'Pessoal', media:218125.82, ago:195087.92, set:268833.91, out:165233.75, itens:[
     {nome:'Salários',media:57800.95,ago:64761.31},
     {nome:'Adiantamento salarial',media:41681.13,ago:46573.42},
     {nome:'Pagamento avulso funcionário',media:40014.68,ago:34975.00},
@@ -2030,10 +2030,10 @@ const FIN_CATS = [
     {nome:'Remuneração de autônomos',media:1527.57,ago:800.00},
     {nome:'PLR',media:2305.50,ago:0},
   ]},
-  {nome:'Cartão empresarial', media:117622.24, ago:172224.43, itens:[
+  {nome:'Cartão empresarial', media:117622.24, ago:172224.43, set:184686.76, out:134799.04, itens:[
     {nome:'Cartão de crédito empresarial',media:117622.24,ago:172224.43},
   ]},
-  {nome:'Vendas e serviços', media:92227.60, ago:104873.09, itens:[
+  {nome:'Vendas e serviços', media:92227.60, ago:104873.09, set:108856.71, out:80524.6, itens:[
     {nome:'Peças de concessionária',media:54956.34,ago:40015.30},
     {nome:'Comissões de vendedores',media:12688.19,ago:25107.51},
     {nome:'Materiais para pintura',media:3435.54,ago:18068.81},
@@ -2043,35 +2043,35 @@ const FIN_CATS = [
     {nome:'Peças aplicadas no serviço',media:567.96,ago:0},
     {nome:'Recuperação de para-choque',media:312.50,ago:0},
   ]},
-  {nome:'Diretoria', media:96620.04, ago:91945.99, itens:[
+  {nome:'Diretoria', media:96620.04, ago:91945.99, set:77328.82, out:84750.76, itens:[
     {nome:'Despesas pessoais dos sócios',media:93441.51,ago:88500.00},
     {nome:'Plano de saúde dos sócios',media:3178.52,ago:3445.99},
   ]},
-  {nome:'Imóvel', media:67238.30, ago:54782.56, itens:[
+  {nome:'Imóvel', media:67238.30, ago:54782.56, set:56605.46, out:51395.38, itens:[
     {nome:'Aluguel',media:39818.92,ago:43780.00},
     {nome:'Manutenção predial',media:20324.82,ago:2441.85},
     {nome:'Energia elétrica',media:5556.26,ago:6730.50},
     {nome:'Água e saneamento',media:1250.86,ago:660.42},
     {nome:'Seguro de imóveis',media:287.44,ago:1169.79},
   ]},
-  {nome:'Empréstimos', media:28753.64, ago:41862.10, itens:[
+  {nome:'Empréstimos', media:28753.64, ago:41862.10, set:39769.71, out:38649.99, itens:[
     {nome:'Empréstimos bancários',media:28753.64,ago:41862.10},
   ]},
-  {nome:'Impostos s/ vendas', media:37012.35, ago:42031.26, itens:[
+  {nome:'Impostos s/ vendas', media:37012.35, ago:42031.26, set:0.0, out:5177.92, itens:[
     {nome:'Simples Nacional — DAS',media:36916.93,ago:41892.86},
     {nome:'ICMS ST sobre vendas',media:95.42,ago:138.40},
   ]},
-  {nome:'Comercial', media:21975.06, ago:28741.39, itens:[
+  {nome:'Comercial', media:21975.06, ago:28741.39, set:23781.19, out:18233.64, itens:[
     {nome:'Marketing e publicidade',media:21903.54,ago:28741.39},
     {nome:'Brindes para clientes',media:71.52,ago:0},
   ]},
-  {nome:'Bens imobilizados', media:6899.28, ago:2414.97, itens:[
+  {nome:'Bens imobilizados', media:6899.28, ago:2414.97, set:1742.1, out:941.96, itens:[
     {nome:'Software e licenças',media:1908.70,ago:2414.97},
     {nome:'Máquinas e equipamentos',media:4568.08,ago:0},
     {nome:'Móveis e instalações comerciais',media:412.50,ago:0},
     {nome:'Móveis e instalações admin.',media:10.00,ago:0},
   ]},
-  {nome:'Administrativas', media:9801.38, ago:9170.81, itens:[
+  {nome:'Administrativas', media:9801.38, ago:9170.81, set:6463.92, out:4322.07, itens:[
     {nome:'Honorários de consultoria',media:3443.00,ago:3443.00},
     {nome:'Honorários contábeis',media:2255.53,ago:2684.90},
     {nome:'Manutenção de equipamentos',media:1060.70,ago:525.00},
@@ -2086,28 +2086,28 @@ const FIN_CATS = [
     {nome:'Honorários — outros',media:82.25,ago:0},
     {nome:'Bens de pequeno valor',media:18.75,ago:0},
   ]},
-  {nome:'Consórcio', media:2443.98, ago:1607.68, itens:[
+  {nome:'Consórcio', media:2443.98, ago:1607.68, set:1593.45, out:1376.06, itens:[
     {nome:'Consórcio',media:2443.98,ago:1607.68},
   ]},
-  {nome:'Financeiras', media:855.11, ago:2591.41, itens:[
+  {nome:'Financeiras', media:855.11, ago:2591.41, set:615.51, out:1419.2, itens:[
     {nome:'Tarifas bancárias',media:633.95,ago:2211.01},
     {nome:'Tarifas DOC/TED',media:221.16,ago:380.40},
   ]},
-  {nome:'Devoluções', media:779.29, ago:0, itens:[
+  {nome:'Devoluções', media:779.29, ago:0, set:0.0, out:0.0, itens:[
     {nome:'Devoluções',media:779.29,ago:0},
   ]},
-  {nome:'Fretes', media:287.06, ago:382.41, itens:[
+  {nome:'Fretes', media:287.06, ago:382.41, set:428.71, out:186.29, itens:[
     {nome:'Frete',media:171.25,ago:60.00},
     {nome:'Fretes pagos',media:115.81,ago:322.41},
   ]},
-  {nome:'Outras despesas', media:375.63, ago:409.00, itens:[
+  {nome:'Outras despesas', media:375.63, ago:409.00, set:1080.8, out:8.0, itens:[
     {nome:'Despesas a identificar',media:318.00,ago:100.00},
     {nome:'Troco',media:57.63,ago:309.00},
   ]},
-  {nome:'Taxa municipal', media:279.93, ago:93.74, itens:[
+  {nome:'Taxa municipal', media:279.93, ago:93.74, set:93.74, out:265.14, itens:[
     {nome:'Taxa de licença da prefeitura',media:279.93,ago:93.74},
   ]},
-  {nome:'Veículos', media:275.25, ago:570.00, itens:[
+  {nome:'Veículos', media:275.25, ago:570.00, set:400.0, out:231.0, itens:[
     {nome:'Combustíveis',media:264.25,ago:544.00},
     {nome:'Pedágios',media:3.25,ago:26.00},
     {nome:'Manutenção de veículos',media:7.75,ago:0},
@@ -2144,7 +2144,7 @@ function finFluxo(names, mi) {
   return sum;
 }
 function getFinCatVal(cat, per) {
-  if(per==='media'||per==='ago') return cat[per]||0;
+  if(cat[per]!==undefined) return cat[per];
   const mi = FLUXO_MES_IDX[per];
   if(mi===undefined) return cat.media||0;
   const keys = FLUXO_MES_MAP[cat.nome];
