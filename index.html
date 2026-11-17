@@ -31,19 +31,7 @@ header h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: 1px; white-spac
 #loading-overlay p { color:white; font-size:.9rem; font-weight:600; }
 .btn-reset { padding: 5px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,.3); background: rgba(255,255,255,.1); color: white; cursor: pointer; font-size: 0.75rem; }
 .btn-reset:hover { background: rgba(220,38,38,.4); }
-#login-screen { display:none; position:fixed; inset:0; background:linear-gradient(135deg,#1a1a2e,#0f3460); z-index:1000; align-items:center; justify-content:center; }
-#login-screen.show { display:flex; }
-.login-box { background:white; border-radius:18px; padding:40px 36px; width:340px; box-shadow:0 20px 60px rgba(0,0,0,.3); }
-.login-box h2 { text-align:center; margin-bottom:6px; color:#1a1a2e; font-size:1.4rem; }
-.login-box p { text-align:center; color:#6b7280; font-size:0.82rem; margin-bottom:24px; }
-.login-field { margin-bottom:14px; }
-.login-field label { display:block; font-size:0.78rem; font-weight:600; color:#374151; margin-bottom:5px; }
-.login-field input { width:100%; padding:10px 12px; border:1.5px solid #d1d5db; border-radius:8px; font-size:0.9rem; outline:none; }
-.login-field input:focus { border-color:#0f3460; }
-.btn-login { width:100%; padding:11px; background:linear-gradient(135deg,#0f3460,#e94560); color:white; border:none; border-radius:8px; font-size:0.95rem; font-weight:700; cursor:pointer; margin-top:6px; }
-.btn-login:hover { opacity:.9; }
-.login-err { color:#dc2626; font-size:0.8rem; text-align:center; margin-top:8px; min-height:18px; }
-.user-badge { font-size:0.72rem; color:rgba(255,255,255,.75); }
+.user-badge { display:none; }
 
 .tabs { display: flex; background: #fff; border-bottom: 2px solid #e0e4ef; padding: 0 28px; }
 .tab { padding: 12px 24px; cursor: pointer; font-size: 0.87rem; font-weight: 600; border-bottom: 3px solid transparent; margin-bottom: -2px; color: #6b7280; transition: all .2s; }
@@ -114,25 +102,14 @@ tr.demitido:hover td { background: #f3f4f6 !important; }
 </head>
 <body>
 
-<div id="login-screen">
-  <div class="login-box">
-    <h2>🚗 TC CAR</h2>
-    <p id="login-subtitle">Digite sua senha para acessar</p>
-    <div class="login-field"><label>Senha</label><input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" autofocus></div>
-    <button class="btn-login" onclick="doLogin()">Entrar</button>
-    <div class="login-err" id="login-err"></div>
-  </div>
-</div>
 
 <div id="loading-overlay"><div class="spinner"></div><p id="loading-msg">Carregando dados...</p></div>
 
 <header>
   <h1 id="header-title">🚗 Dashboard TC CAR</h1>
   <div class="header-right">
-    <span class="user-badge" id="user-badge"></span>
     <span id="save-ind" class="save-indicator">✓ Salvo</span>
     <button class="btn-reset" onclick="confirmReset()">↺ Restaurar</button>
-    <button class="btn-reset" onclick="doLogout()" style="background:rgba(220,38,38,.3)">Sair</button>
   </div>
 </header>
 
@@ -291,8 +268,8 @@ tr.demitido:hover td { background: #f3f4f6 !important; }
 <!-- FATURAMENTO -->
 <div id="tab-faturamento" class="content">
   <div class="kpi-row">
-    <div class="kpi green"><div class="kpi-val" id="k-fat-total">R$ 6,49M</div><div class="kpi-label">Total 2026 (Jan–Out)</div></div>
-    <div class="kpi blue"><div class="kpi-val" id="k-fat-media">R$ 649k</div><div class="kpi-label">Média mensal 2026</div></div>
+    <div class="kpi green"><div class="kpi-val" id="k-fat-total">R$ 6,72M</div><div class="kpi-label">Total 2026 (Jan–Out)</div></div>
+    <div class="kpi blue"><div class="kpi-val" id="k-fat-media">R$ 672k</div><div class="kpi-label">Média mensal 2026</div></div>
     <div class="kpi purple"><div class="kpi-val">+19%</div><div class="kpi-label">vs Jan–Out 2025</div></div>
     <div class="kpi orange"><div class="kpi-val">79%</div><div class="kpi-label">Serviços / Total</div></div>
   </div>
@@ -337,10 +314,11 @@ tr.demitido:hover td { background: #f3f4f6 !important; }
 
   <div class="section-title" style="margin-top:24px">Volume de carros atendidos — 2026</div>
   <div class="kpi-row" style="margin-bottom:16px">
-    <div class="kpi green"><div class="kpi-val">1.052</div><div class="kpi-label">Total carros (Jan–Set)</div></div>
-    <div class="kpi blue"><div class="kpi-val">117</div><div class="kpi-label">Média mensal</div></div>
-    <div class="kpi purple"><div class="kpi-val">796</div><div class="kpi-label">Seguro (76%)</div></div>
-    <div class="kpi orange"><div class="kpi-val">256</div><div class="kpi-label">Particular (24%)</div></div>
+    <div class="kpi green"><div class="kpi-val">1.204</div><div class="kpi-label">Total carros (Jan–Out)</div></div>
+    <div class="kpi blue"><div class="kpi-val">120</div><div class="kpi-label">Média mensal</div></div>
+    <div class="kpi purple"><div class="kpi-val">913</div><div class="kpi-label">Seguro (76%)</div></div>
+    <div class="kpi orange"><div class="kpi-val">291</div><div class="kpi-label">Particular (24%)</div></div>
+    <div class="kpi" style="border-left:4px solid #6366f1"><div class="kpi-val" style="color:#6366f1">R$ 5.584</div><div class="kpi-label">Ticket médio/carro</div></div>
   </div>
   <div class="table-wrap" style="padding:16px;margin-bottom:20px">
     <div style="position:relative;width:100%;height:260px">
@@ -354,6 +332,8 @@ tr.demitido:hover td { background: #f3f4f6 !important; }
         <th style="text-align:right">🛡️ Seguro</th>
         <th style="text-align:right">🚗 Particular</th>
         <th style="text-align:right">Total</th>
+        <th style="text-align:right">💰 Faturamento</th>
+        <th style="text-align:right">🎯 Ticket Médio</th>
         <th style="text-align:right">% Seguro</th>
       </tr></thead>
       <tbody id="body-carros"></tbody>
@@ -640,6 +620,12 @@ function saveAcao(id,val){
     </div>
   </div>
   <div id="fluxo-kpis" class="kpi-row" style="margin-bottom:16px"></div>
+  <div class="table-wrap" style="padding:16px;margin-bottom:20px">
+    <div class="section-title" style="margin-bottom:12px;font-size:.85rem">Recebimentos × Despesas × Resultado</div>
+    <div style="position:relative;width:100%;height:280px">
+      <canvas id="chart-fluxo-linha" role="img" aria-label="Linha de recebimentos, despesas e resultado mensal"></canvas>
+    </div>
+  </div>
   <div class="table-wrap" style="overflow-x:auto">
     <table id="table-fluxo" style="min-width:900px;font-size:.78rem">
       <thead id="thead-fluxo"></thead>
@@ -931,67 +917,28 @@ function showInd(ok) {
   window._st = setTimeout(() => { el.classList.remove('show','warn'); el.textContent='✓ Salvo'; }, 3000);
 }
 
-// detecta e-mail no hash da URL (links de cliente)
-(function() {
-  const hash = window.location.hash.slice(1);
-  if (hash && hash.includes('@')) {
-    window._clientEmail = decodeURIComponent(hash);
-    document.getElementById('field-email').style.display = 'none';
-    document.getElementById('login-subtitle').textContent = 'Digite sua senha para acessar';
-  }
-})();
-
-async function doLogin() {
-  const pass  = document.getElementById('login-pass').value;
-  const errEl = document.getElementById('login-err');
-  errEl.textContent = '';
-  if (!pass) { errEl.textContent = 'Digite a senha.'; return; }
-  const btn = document.querySelector('.btn-login');
-  btn.textContent = 'Entrando...'; btn.disabled = true;
-  const { data, error } = await _sb.auth.signInWithPassword({ email: 'barreto@gestaoessencial.com', password: pass });
-  btn.textContent = 'Entrar'; btn.disabled = false;
-  if (error) { errEl.textContent = 'Senha incorreta.'; return; }
-  await onLogin(data.user);
-}
-
-async function onLogin(user) {
-  _currentUser = user;
-  document.getElementById('login-screen').classList.remove('show');
-  document.getElementById('user-badge').textContent = user.email;
+async function initDashboard() {
   showOverlay('Carregando dados...');
-  // busca dados do usuário
-  const { data: row } = await _sb.from('empresas').select('dados,meta,nome').eq('id', user.id).single();
-  if (row && Array.isArray(row.dados) && row.dados.length > 0) {
-    COLABS = row.dados;
-    if (row.nome) document.getElementById('header-title').textContent = '🚗 ' + row.nome;
-    if (row.meta) {
-      if (Array.isArray(row.meta.saldos) && row.meta.saldos.length) {
-        const _def = SALDOS_DATA; // entradas hardcoded do HTML
-        SALDOS_DATA = row.meta.saldos;
-        // Append entradas do HTML que são mais recentes que o último do Supabase
-        const lastCloud = SALDOS_DATA[SALDOS_DATA.length-1]?.data;
-        _def.forEach(e => { if(e.data !== lastCloud && !SALDOS_DATA.find(s=>s.data===e.data)) SALDOS_DATA.push(e); });
-      }
-      if (Array.isArray(row.meta.carros) && row.meta.carros.length) FAT_CARROS = row.meta.carros;
-      if (Array.isArray(row.meta.fat2026) && row.meta.fat2026.length) FAT_2026 = row.meta.fat2026;
-      if (Array.isArray(row.meta.fluxo25) && row.meta.fluxo25.length) FLUXO_2025 = row.meta.fluxo25;
-      if (Array.isArray(row.meta.fluxo26) && row.meta.fluxo26.length) FLUXO_2026 = row.meta.fluxo26;
+  // carrega dados do localStorage se existirem
+  try {
+    const metaRaw = localStorage.getItem('tccar_meta');
+    if (metaRaw) {
+      const m = JSON.parse(metaRaw);
+      if (Array.isArray(m.saldos) && m.saldos.length) SALDOS_DATA = m.saldos;
+      // FAT_CARROS, FAT_2026 e FLUXO_2026 são mantidos no HTML — não sobrescreve do localStorage
     }
-  } else {
-    // primeiro acesso: sobe dados padrão
-    COLABS = JSON.parse(JSON.stringify(DEFAULT_COLABS));
-    await _sb.from('empresas').upsert({ id: user.id, nome: 'TC CAR', dados: COLABS });
-  }
+    const colabsRaw = localStorage.getItem('tccar_v3');
+    if (colabsRaw) {
+      const c = JSON.parse(colabsRaw);
+      // Só usa localStorage se os itens tiverem a estrutura completa (com ferias)
+      if (Array.isArray(c) && c.length && c[0].ferias !== undefined) COLABS = c;
+      else COLABS = JSON.parse(JSON.stringify(DEFAULT_COLABS));
+    } else {
+      COLABS = JSON.parse(JSON.stringify(DEFAULT_COLABS));
+    }
+  } catch(e) {}
   hideOverlay();
   renderAll();
-}
-
-async function doLogout() {
-  await _sb.auth.signOut();
-  _currentUser = null;
-  COLABS = [];
-  document.getElementById('login-screen').classList.add('show');
-  document.getElementById('user-badge').textContent = '';
 }
 
 async function saveToCloud() {
@@ -1025,14 +972,7 @@ async function confirmReset() {
 
 // ── INIT ──
 async function load() {
-  // tenta sessão existente no Supabase
-  const { data: { session } } = await _sb.auth.getSession();
-  if (session) {
-    await onLogin(session.user);
-    return;
-  }
-  // sem sessão: mostra tela de senha
-  document.getElementById('login-screen').classList.add('show');
+  await initDashboard();
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1244,10 +1184,10 @@ function renderPcmso() {
 }
 
 function renderFerias() {
-  const com=COLABS.filter(c=>c.ferias.limite||c.ferias.data).length;
-  const comSaldo=COLABS.filter(c=>pn(c.ferias.saldo)>0).length;
-  const totalDias=COLABS.reduce((s,c)=>s+pn(c.ferias.dias),0);
-  const venc=COLABS.filter(c=>{if(!c.ferias.limite)return false;return(new Date(c.ferias.limite)-TODAY)/86400000<=90;}).length;
+  const com=COLABS.filter(c=>c.ferias?.limite||c.ferias?.data).length;
+  const comSaldo=COLABS.filter(c=>pn(c.ferias?.saldo)>0).length;
+  const totalDias=COLABS.reduce((s,c)=>s+pn(c.ferias?.dias),0);
+  const venc=COLABS.filter(c=>{if(!c.ferias?.limite)return false;return(new Date(c.ferias.limite)-TODAY)/86400000<=90;}).length;
   document.getElementById('k-f-com').textContent=com;
   document.getElementById('k-f-sal').textContent=comSaldo;
   document.getElementById('k-f-dias').textContent=totalDias;
@@ -1470,22 +1410,22 @@ function importarUniformesChat(){
 // ═══════════════════════════════════════════════════════════════════
 const FAT_MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 let FAT_2026 = [
-  {mes:'Jan',servicos:342377.3,produtos:147492.7},
-  {mes:'Fev',servicos:525962.16,produtos:177868.94},
-  {mes:'Mar',servicos:590296.69,produtos:123120.77},
-  {mes:'Abr',servicos:495006.03,produtos:172056.39},
-  {mes:'Mai',servicos:508501.89,produtos:144816.46},
-  {mes:'Jun',servicos:597707.65,produtos:150514.83},
-  {mes:'Jul',servicos:553099.48,produtos:89694.4},
-  {mes:'Ago',servicos:551670.71,produtos:118952.43},
-  {mes:'Set',servicos:518990.0,produtos:67144.29},
-  {mes:'Out',servicos:456310.85,produtos:159685.61},
+  {mes:'Jan',servicos:459488.48,produtos:126268.72},
+  {mes:'Fev',servicos:561364.27,produtos:100764.86},
+  {mes:'Mar',servicos:612417.60,produtos:83741.04},
+  {mes:'Abr',servicos:622782.39,produtos:111821.25},
+  {mes:'Mai',servicos:605163.99,produtos:85344.54},
+  {mes:'Jun',servicos:615926.72,produtos:119979.61},
+  {mes:'Jul',servicos:590195.39,produtos:130413.07},
+  {mes:'Ago',servicos:535118.04,produtos:107492.08},
+  {mes:'Set',servicos:585643.90,produtos:108276.66},
+  {mes:'Out',servicos:591810.71,produtos:168134.26},
 ];
 const FAT_HIST = {
   '2023':[351663.45,291700.45,476714.13,350275.91,475250.91,369956.39,385513.33,410302.14,371167.36,402382.24,311602.96,312539.25],
   '2024':[256391.95,354279.78,432036.33,440813.69,441581.04,443533.62,452214.59,501375.24,440912.08,485822.09,421396.33,500058.55],
   '2025':[467081.85,524922.12,505485.00,501352.00,524344.00,506605.79,584296.68,574990.56,611880.87,654398.84,650953.20,618529.81],
-  '2026':[489870.0,703831.1,713417.46,667062.42,653318.35,748222.48,642793.88,670623.14,586134.29,615996.46,null,null]
+  '2026':[585757.20,662129.13,696158.64,734603.64,690508.53,735906.33,720608.46,642610.12,693920.56,759944.97,null,null]
 };
 let FAT_CARROS = [
   {mes:'Jan',seguro:63,particular:63},
@@ -1497,6 +1437,7 @@ let FAT_CARROS = [
   {mes:'Jul',seguro:93,particular:21},
   {mes:'Ago',seguro:93,particular:26},
   {mes:'Set',seguro:79,particular:21},
+  {mes:'Out',seguro:117,particular:35},
 ];
 let _chartAnos=null, _chart2026=null, _chartCarros=null;
 
@@ -1580,11 +1521,16 @@ function renderFaturamento(){
       tbc.innerHTML='';
       FAT_CARROS.forEach((row,i)=>{
         const tot=row.seguro+row.particular;
+        const fatRow=FAT_2026.find(r=>r.mes===row.mes);
+        const fat=fatRow?(fatRow.servicos+fatRow.produtos):null;
+        const ticket=fat&&tot?Math.round(fat/tot):null;
         const tr=document.createElement('tr');
         tr.innerHTML=`<td><b contenteditable="true" style="outline:none" onblur="FAT_CARROS[${i}].mes=this.textContent.trim();saveMeta();">${row.mes}</b></td>
           <td ${cedit()} onblur="FAT_CARROS[${i}].seguro=parseInt(this.textContent)||0;renderFaturamento();saveMeta();">${row.seguro}</td>
           <td ${cedit()} onblur="FAT_CARROS[${i}].particular=parseInt(this.textContent)||0;renderFaturamento();saveMeta();">${row.particular}</td>
           <td style="text-align:right;font-weight:600">${tot}</td>
+          <td style="text-align:right;color:#6366f1">${fat?brl(fat):'—'}</td>
+          <td style="text-align:right;font-weight:600;color:#0f3460">${ticket?'R$ '+ticket.toLocaleString('pt-BR'):'—'}</td>
           <td style="text-align:right;color:#10b981">${tot?((row.seguro/tot)*100).toFixed(0)+'%':'—'}</td>
           <td><button onclick="FAT_CARROS.splice(${i},1);renderFaturamento();saveMeta();" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:.9rem;" title="Remover">🗑</button></td>`;
         tbc.appendChild(tr);
@@ -1592,12 +1538,14 @@ function renderFaturamento(){
       const tSeg=FAT_CARROS.reduce((a,r)=>a+r.seguro,0);
       const tPar=FAT_CARROS.reduce((a,r)=>a+r.particular,0);
       const tTot=tSeg+tPar;
+      const tFat=FAT_2026.reduce((a,r)=>a+(r.servicos+r.produtos),0);
+      const tTicket=tFat&&tTot?Math.round(tFat/tTot):0;
       const tfr=document.createElement('tr');
       tfr.style.fontWeight='700';tfr.style.background='#f8faff';
-      tfr.innerHTML=`<td>Total</td><td style="text-align:right">${tSeg}</td><td style="text-align:right">${tPar}</td><td style="text-align:right">${tTot}</td><td style="text-align:right;color:#10b981">${tTot?((tSeg/tTot)*100).toFixed(0)+'%':'—'}</td><td></td>`;
+      tfr.innerHTML=`<td>Total</td><td style="text-align:right">${tSeg}</td><td style="text-align:right">${tPar}</td><td style="text-align:right">${tTot}</td><td style="text-align:right;color:#6366f1">${brl(tFat)}</td><td style="text-align:right;color:#0f3460">R$ ${tTicket.toLocaleString('pt-BR')}</td><td style="text-align:right;color:#10b981">${tTot?((tSeg/tTot)*100).toFixed(0)+'%':'—'}</td><td></td>`;
       tbc.appendChild(tfr);
       const addTrc=document.createElement('tr');
-      addTrc.innerHTML=`<td colspan="6"><button onclick="FAT_CARROS.push({mes:'Novo',seguro:0,particular:0});renderFaturamento();saveMeta();" style="background:none;border:1px dashed #378ADD;border-radius:6px;padding:4px 12px;color:#378ADD;cursor:pointer;width:100%;font-size:.85rem;">➕ Novo mês</button></td>`;
+      addTrc.innerHTML=`<td colspan="8"><button onclick="FAT_CARROS.push({mes:'Novo',seguro:0,particular:0});renderFaturamento();saveMeta();" style="background:none;border:1px dashed #378ADD;border-radius:6px;padding:4px 12px;color:#378ADD;cursor:pointer;width:100%;font-size:.85rem;">➕ Novo mês</button></td>`;
       tbc.appendChild(addTrc);
     }
     // Chart carros
@@ -1725,39 +1673,39 @@ let FLUXO_2025 = [
 ];
 const FLUXO_COLS_2026 = ['jan/26','fev/26','mar/26','abr/26','mai/26','jun/26','jul/26','ago/26','set/26','out/26'];
 let FLUXO_2026 = [
-  {n:'Total de Recebimentos',lv:0,v:[490359.09,703834.48,714269.25,667166.05,653326.05,748430.85,653646.18,670623.78,594134.51,616246.51]},
-  {n:'3.01 Receitas de Vendas e de Serviços',lv:1,v:[489870.0,703831.1,713417.46,667062.42,653318.35,748222.48,642793.88,670623.14,586134.29,615996.46]},
-  {n:'Receitas de Serviços',lv:2,v:[342377.3,525962.16,590296.69,495006.03,508501.89,597707.65,553099.48,551670.71,518990.0,456310.85]},
-  {n:'Receitas de Vendas',lv:2,v:[147492.7,177868.94,123120.77,172056.39,144816.46,150514.83,89694.4,118952.43,67144.29,159685.61]},
-  {n:'3.02 Receitas Financeiras',lv:1,v:[0.96,3.38,3.79,103.63,7.68,8.37,1.06,0.64,0.22,0.15]},
-  {n:'Rendimentos de Aplicações',lv:2,v:[0.96,3.38,3.79,103.63,7.68,8.37,1.06,0.64,0.22,0.15]},
+  {n:'Total de Recebimentos',lv:0,v:[490359.09,703834.48,714269.25,667166.05,653326.05,748430.85,653646.18,670623.78,594134.51,837608.69]},
+  {n:'3.01 Receitas de Vendas e de Serviços',lv:1,v:[489870.0,703831.1,713417.46,667062.42,653318.35,748222.48,642793.88,670623.14,586134.29,837358.51]},
+  {n:'Receitas de Serviços',lv:2,v:[342377.3,525962.16,590296.69,495006.03,508501.89,597707.65,553099.48,551670.71,518990.0,621802.74]},
+  {n:'Receitas de Vendas',lv:2,v:[147492.7,177868.94,123120.77,172056.39,144816.46,150514.83,89694.4,118952.43,67144.29,215555.77]},
+  {n:'3.02 Receitas Financeiras',lv:1,v:[0.96,3.38,3.79,103.63,7.68,8.37,1.06,0.64,0.22,0.28]},
+  {n:'Rendimentos de Aplicações',lv:2,v:[0.96,3.38,3.79,103.63,7.68,8.37,1.06,0.64,0.22,0.28]},
   {n:'3.03 Outras Receitas e Entradas',lv:1,v:[488.13,0.0,848.0,0.0,0.0,200.0,10851.24,0.0,0.0,249.9]},
   {n:'ESTORNO BANCARIO',lv:1,v:[0.0,0.0,848.0,0.0,0.0,0.0,0.0,0.0,0.0,249.9]},
   {n:'Receitas a Identificar',lv:2,v:[488.13,0.0,0.0,0.0,0.0,200.0,10851.24,0.0,0.0,0.0]},
   {n:'Saldo Inicial',lv:2,v:[0.0,0.0,0.0,0.0,0.02,0.0,0.0,0.0,8000.0,0.0]},
-  {n:'Total de Pagamentos',lv:0,v:[-619143.19,-577318.46,-661855.12,-692227.53,-753782.39,-765650.11,-793809.98,-748788.76,-773455.8,-588689.81]},
-  {n:'4.01 Impostos sobre Vendas e sobre Serviços',lv:1,v:[-14673.12,-43117.22,-61791.21,-30546.78,-37440.49,-31842.15,-34656.57,-42031.26,0.0,-5177.92]},
+  {n:'Total de Pagamentos',lv:0,v:[-619143.19,-577318.46,-661855.12,-692227.53,-753782.39,-765650.11,-793809.98,-740568.76,-778266.64,-786168.33]},
+  {n:'4.01 Impostos sobre Vendas e sobre Serviços',lv:1,v:[-14673.12,-43117.22,-61791.21,-30546.78,-37440.49,-31842.15,-34656.57,-42031.26,-4810.84,-38408.7]},
   {n:'ICMS ST sobre Vendas',lv:2,v:[0.0,0.0,-235.21,0.0,0.0,0.0,-389.75,-138.4,0.0,0.0]},
   {n:'ICMS ST',lv:1,v:[0.0,0.0,-235.21,0.0,0.0,0.0,-389.75,-138.4,0.0,0.0]},
-  {n:'Simples Nacional - DAS',lv:2,v:[-14673.12,-43117.22,-61556.0,-30546.78,-37440.49,-31842.15,-34266.82,-41892.86,0.0,-5177.92]},
-  {n:'4.02 Despesas com Vendas e Serviços',lv:1,v:[-115198.87,-98410.4,-90518.24,-97464.57,-71245.64,-79911.96,-80198.0,-104873.09,-108856.71,-80524.6]},
-  {n:'Comissões de Vendedores',lv:2,v:[-2008.4,-19920.93,-11785.4,-14124.91,-11410.22,-10127.18,-7021.0,-25107.51,-15385.56,-120.0]},
-  {n:'Materiais Aplicados na Prestação de Serviços',lv:2,v:[-31166.16,-12094.45,-10528.56,-8720.3,-4851.8,-5274.76,-3585.3,-3130.0,-6982.73,-3569.6]},
-  {n:'Materiais para Pintura',lv:2,v:[0.0,0.0,-4134.2,-2478.3,-1878.0,-200.0,-725.01,-18068.81,-21576.52,-20454.86]},
-  {n:'Materiais para Revenda',lv:2,v:[-400.32,-1456.37,-1768.46,-5271.74,-3805.8,-6145.59,-9480.21,-8305.64,-13902.12,-12359.48]},
-  {n:'PEÇAS',lv:1,v:[-400.32,-1456.37,-1768.46,-5271.74,-3805.8,-6145.59,-9480.21,-8305.64,-13902.12,-12359.48]},
-  {n:'Peças Concessionária',lv:2,v:[-77563.86,-64338.65,-60223.06,-57709.34,-47874.82,-51013.41,-40912.26,-40015.3,-47539.54,-39331.0]},
+  {n:'Simples Nacional - DAS',lv:2,v:[-14673.12,-43117.22,-61556.0,-30546.78,-37440.49,-31842.15,-34266.82,-41892.86,-4810.84,-38408.7]},
+  {n:'4.02 Despesas com Vendas e Serviços',lv:1,v:[-115198.87,-98410.4,-90518.24,-97464.57,-71245.64,-79911.96,-80198.0,-104873.09,-108856.71,-120860.69]},
+  {n:'Comissões de Vendedores',lv:2,v:[-2008.4,-19920.93,-11785.4,-14124.91,-11410.22,-10127.18,-7021.0,-25107.51,-15385.56,-9438.07]},
+  {n:'Materiais Aplicados na Prestação de Serviços',lv:2,v:[-31166.16,-12094.45,-10528.56,-8720.3,-4851.8,-5274.76,-3585.3,-3130.0,-6982.73,-5196.62]},
+  {n:'Materiais para Pintura',lv:2,v:[0.0,0.0,-4134.2,-2478.3,-1878.0,-200.0,-725.01,-18068.81,-21576.52,-25192.88]},
+  {n:'Materiais para Revenda',lv:2,v:[-400.32,-1456.37,-1768.46,-5271.74,-3805.8,-6145.59,-9480.21,-8305.64,-13902.12,-15040.74]},
+  {n:'PEÇAS',lv:1,v:[-400.32,-1456.37,-1768.46,-5271.74,-3805.8,-6145.59,-9480.21,-8305.64,-13902.12,-15040.74]},
+  {n:'Peças Concessionária',lv:2,v:[-77563.86,-64338.65,-60223.06,-57709.34,-47874.82,-51013.41,-40912.26,-40015.3,-47539.54,-59758.2]},
   {n:'Peças aplicadas no serviço',lv:2,v:[-4060.13,0.0,-483.56,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},
   {n:'RECUPERAÇÃO PARACHOQUE',lv:1,v:[0.0,0.0,0.0,0.0,0.0,-2500.0,0.0,0.0,0.0,0.0]},
-  {n:'Serviços de Terceiros',lv:2,v:[0.0,-600.0,-1595.0,-9159.98,-1425.0,-4651.02,-18474.22,-10245.83,-1695.2,-2453.81]},
-  {n:'4.03 Despesas com Salários e Encargos',lv:1,v:[-115721.03,-99032.8,-145818.85,-137595.1,-164293.14,-134418.43,-169617.64,-139599.18,-168478.34,-137153.68]},
-  {n:'Adiantamento Salarial',lv:2,v:[-24587.48,-31269.56,-47581.6,-43008.71,-49102.92,-43803.72,-47521.6,-46573.42,-45439.28,-46576.75]},
-  {n:'FGTS e Multa de FGTS',lv:2,v:[-15760.29,-12060.14,-9652.2,-9881.25,-18025.86,-11478.35,-19344.49,-9959.66,-16287.34,-2961.27]},
+  {n:'Serviços de Terceiros',lv:2,v:[0.0,-600.0,-1595.0,-9159.98,-1425.0,-4651.02,-18474.22,-10245.83,-1695.2,-2559.49]},
+  {n:'4.03 Despesas com Salários e Encargos',lv:1,v:[-115721.03,-99032.8,-145818.85,-137595.1,-164293.14,-134418.43,-169617.64,-139599.18,-168478.34,-163608.97]},
+  {n:'Adiantamento Salarial',lv:2,v:[-24587.48,-31269.56,-47581.6,-43008.71,-49102.92,-43803.72,-47521.6,-46573.42,-45439.28,-49204.47]},
+  {n:'FGTS e Multa de FGTS',lv:2,v:[-15760.29,-12060.14,-9652.2,-9881.25,-18025.86,-11478.35,-19344.49,-9959.66,-16287.34,-13382.43]},
   {n:'Férias',lv:2,v:[-8193.99,-1111.11,-4796.45,0.0,0.0,-2285.07,-8956.7,-4506.24,0.0,-6169.25]},
-  {n:'INSS sobre Salários - GPS',lv:2,v:[-12385.56,-9486.49,-8648.24,-9064.59,-9751.42,-10056.55,-11017.01,-11142.37,-11925.53,0.0]},
+  {n:'INSS sobre Salários - GPS',lv:2,v:[-12385.56,-9486.49,-8648.24,-9064.59,-9751.42,-10056.55,-11017.01,-11142.37,-11925.53,-10610.64]},
   {n:'PLR - Participação nos Lucros e Resultados',lv:2,v:[0.0,0.0,-17595.96,-848.0,0.0,0.0,0.0,0.0,0.0,-18450.0]},
   {n:'Remuneração de Autônomos',lv:2,v:[-1300.0,-720.0,-1200.0,-4752.0,-1698.53,-750.0,-1000.0,-800.0,0.0,0.0]},
-  {n:'Rescisões',lv:2,v:[-15304.42,-659.9,0.0,0.0,-24107.64,-4239.07,-15843.83,-1856.18,-24275.94,0.0]},
+  {n:'Rescisões',lv:2,v:[-15304.42,-659.9,0.0,0.0,-24107.64,-4239.07,-15843.83,-1856.18,-24275.94,-2795.77]},
   {n:'Salários',lv:2,v:[-38189.29,-43725.6,-56344.4,-70040.55,-61606.77,-61805.67,-65934.01,-64761.31,-70550.25,-62996.41]},
   {n:'4.04 Despesas com Colaboradores',lv:1,v:[-44695.33,-32855.32,-41353.03,-49659.83,-49896.07,-18399.98,-61419.67,-20513.74,-53980.57,-6005.07]},
   {n:'BONUS',lv:1,v:[-3060.0,-4064.0,-3200.0,-1670.0,-7800.0,-3800.0,-1100.0,-11231.5,-2220.0,-1700.0]},
@@ -1770,58 +1718,58 @@ let FLUXO_2026 = [
   {n:'Uniformes',lv:2,v:[-430.0,0.0,0.0,0.0,0.0,0.0,0.0,-3217.5,0.0,0.0]},
   {n:'Vale-Alimentação',lv:2,v:[-37028.0,-23086.96,-27911.2,-25689.0,-27366.0,-8357.31,-47319.6,-1404.0,-45879.0,-1803.0]},
   {n:'Vale-Transporte',lv:2,v:[0.0,-3036.0,-552.4,-989.4,-1246.0,-949.6,0.0,-1750.0,-2689.5,-1105.0]},
-  {n:'4.05 Despesas Administrativas',lv:1,v:[-7127.98,-8622.01,-7761.78,-7361.67,-11114.62,-12615.14,-14637.02,-9170.81,-6463.92,-4322.07]},
+  {n:'4.05 Despesas Administrativas',lv:1,v:[-7127.98,-8622.01,-7761.78,-7361.67,-11114.62,-12615.14,-14637.02,-9400.81,-6463.92,-8252.83]},
   {n:'Bens de Pequeno Valor',lv:2,v:[0.0,0.0,0.0,-150.0,0.0,0.0,0.0,0.0,0.0,0.0]},
-  {n:'Copa e Cozinha',lv:2,v:[0.0,-710.0,-535.86,-725.0,-355.0,-695.0,-355.0,-695.0,-410.0,-1305.84]},
+  {n:'Copa e Cozinha',lv:2,v:[0.0,-710.0,-535.86,-725.0,-355.0,-695.0,-355.0,-695.0,-410.0,-1695.84]},
   {n:'Honorários (outros)',lv:2,v:[0.0,0.0,0.0,0.0,-658.0,0.0,0.0,0.0,0.0,0.0]},
   {n:'Honorários Advocatícios',lv:2,v:[0.0,-1500.0,-1500.0,-192.1,-1175.0,-2925.0,-1750.0,0.0,0.0,0.0]},
-  {n:'Honorários Consultoria',lv:2,v:[-3443.0,-3443.0,-3443.0,-3443.0,-3443.0,-3443.0,-3443.0,-3443.0,-3443.0,0.0]},
+  {n:'Honorários Consultoria',lv:2,v:[-3443.0,-3443.0,-3443.0,-3443.0,-3443.0,-3443.0,-3443.0,-3443.0,-3443.0,-3443.0]},
   {n:'Honorários Contábeis',lv:2,v:[-1839.9,-1914.9,-1914.9,-1934.9,-3234.9,-2584.9,-1934.9,-2684.9,-1934.9,-1934.9]},
   {n:'Lanches e Refeições',lv:2,v:[-145.0,-145.0,0.0,0.0,-458.0,-48.0,0.0,-409.0,0.0,0.0]},
-  {n:'Manutenção de Equipamentos',lv:2,v:[0.0,0.0,0.0,0.0,-194.8,-1775.8,-5990.0,-525.0,-36.5,-140.0]},
+  {n:'Manutenção de Equipamentos',lv:2,v:[0.0,0.0,0.0,0.0,-194.8,-1775.8,-5990.0,-525.0,-36.5,-148.0]},
   {n:'Materiais de Escritório',lv:2,v:[-1115.6,-400.4,0.0,-341.3,0.0,-323.8,-202.0,-607.0,-99.41,0.0]},
-  {n:'Materiais de Limpeza e de Higiene',lv:2,v:[-150.0,-48.0,-34.0,-25.0,-20.0,-388.0,-590.0,-277.0,-149.0,-597.0]},
+  {n:'Materiais de Limpeza e de Higiene',lv:2,v:[-150.0,-48.0,-34.0,-25.0,-20.0,-388.0,-590.0,-507.0,-149.0,-605.0]},
   {n:'Retenção - ISS Serviços Tomados',lv:2,v:[-197.57,-74.05,-50.54,-305.07,-191.12,-230.64,0.0,-192.26,0.0,0.0]},
-  {n:'Telefonia e Internet',lv:2,v:[-236.91,-386.66,-283.48,-245.3,-244.8,-201.0,-342.12,-295.65,-371.11,-312.33]},
+  {n:'Telefonia e Internet',lv:2,v:[-236.91,-386.66,-283.48,-245.3,-244.8,-201.0,-342.12,-295.65,-371.11,-394.09]},
   {n:'Transporte Urbano (táxi, Uber)',lv:2,v:[0.0,0.0,0.0,0.0,-1140.0,0.0,-30.0,-42.0,-20.0,-32.0]},
-  {n:'4.06 Despesas Comerciais',lv:1,v:[-22238.03,-16630.25,-19909.5,-29626.0,-13085.0,-21404.2,-24166.07,-28741.39,-23781.19,-18233.64]},
-  {n:'Brindes para Clientes',lv:2,v:[0.0,-213.15,0.0,0.0,-359.0,0.0,0.0,0.0,0.0,0.0]},
-  {n:'Marketing e Publicidade',lv:2,v:[-22238.03,-16417.1,-19909.5,-29626.0,-12726.0,-21404.2,-24166.07,-28741.39,-23781.19,-18233.64]},
-  {n:'4.07 Despesas com Imóvel',lv:1,v:[-44041.45,-43773.69,-48999.5,-72845.58,-120047.03,-93507.78,-59908.77,-54782.56,-56605.46,-51395.38]},
+  {n:'4.06 Despesas Comerciais',lv:1,v:[-22238.03,-16630.25,-19909.5,-29626.0,-13085.0,-21404.2,-24166.07,-28741.39,-23781.19,-25083.64]},
+  {n:'Brindes para Clientes',lv:2,v:[0.0,-213.15,0.0,0.0,-359.0,0.0,0.0,0.0,0.0,-150.0]},
+  {n:'Marketing e Publicidade',lv:2,v:[-22238.03,-16417.1,-19909.5,-29626.0,-12726.0,-21404.2,-24166.07,-28741.39,-23781.19,-24933.64]},
+  {n:'4.07 Despesas com Imóvel',lv:1,v:[-44041.45,-43773.69,-48999.5,-72845.58,-120047.03,-93507.78,-59908.77,-54782.56,-56605.46,-52903.06]},
   {n:'Aluguel',lv:2,v:[-33891.09,-34891.09,-37974.59,-39974.59,-43780.0,-42280.0,-41980.0,-43780.0,-43780.0,-35780.0]},
-  {n:'Energia Elétrica',lv:2,v:[-5598.36,-4431.26,-4911.79,-5430.69,-6095.12,-5320.77,-5931.61,-6730.5,-7126.92,-7179.09]},
-  {n:'Manutenção Predial',lv:2,v:[-2358.0,-3167.0,-4777.0,-25155.14,-68577.77,-44452.55,-11669.24,-2441.85,-3650.6,-6156.35]},
+  {n:'Energia Elétrica',lv:2,v:[-5598.36,-4431.26,-4911.79,-5430.69,-6095.12,-5320.77,-5931.61,-6730.5,-7126.92,-7435.44]},
+  {n:'Manutenção Predial',lv:2,v:[-2358.0,-3167.0,-4777.0,-25155.14,-68577.77,-44452.55,-11669.24,-2441.85,-3650.6,-7407.68]},
   {n:'Seguro de Imóveis',lv:2,v:[-1129.71,0.0,0.0,0.0,0.0,0.0,0.0,-1169.79,-1169.78,-1169.78]},
   {n:'Água e Saneamento',lv:2,v:[-1064.29,-1284.34,-1336.12,-2285.16,-1594.14,-1454.46,-327.92,-660.42,-878.16,-1110.16]},
-  {n:'4.08 Despesas com Veículos',lv:1,v:[-300.0,-150.0,-317.0,-255.0,-110.0,-350.0,-150.0,-570.0,-400.0,-231.0]},
-  {n:'Combustíveis',lv:2,v:[-300.0,-150.0,-255.0,-255.0,-110.0,-350.0,-150.0,-544.0,-400.0,-231.0]},
+  {n:'4.08 Despesas com Veículos',lv:1,v:[-300.0,-150.0,-317.0,-255.0,-110.0,-350.0,-150.0,-620.0,-400.0,-461.0]},
+  {n:'Combustíveis',lv:2,v:[-300.0,-150.0,-255.0,-255.0,-110.0,-350.0,-150.0,-594.0,-400.0,-461.0]},
   {n:'Manutenção de Veículos',lv:2,v:[0.0,0.0,-62.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},
   {n:'Pedágios',lv:2,v:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,-26.0,0.0,0.0]},
-  {n:'4.09 Despesas com Diretoria',lv:1,v:[-94089.37,-89889.37,-98509.37,-100489.37,-95789.37,-120843.48,-81403.98,-91945.99,-77328.82,-84750.76]},
-  {n:'Despesas Pessoais dos Sócios',lv:2,v:[-91000.0,-86800.0,-95420.0,-97400.0,-92700.0,-117754.11,-77957.99,-88500.0,-73882.83,-81230.0]},
+  {n:'4.09 Despesas com Diretoria',lv:1,v:[-94089.37,-89889.37,-98509.37,-100489.37,-95789.37,-120843.48,-81403.98,-83445.99,-77328.82,-86750.76]},
+  {n:'Despesas Pessoais dos Sócios',lv:2,v:[-91000.0,-86800.0,-95420.0,-97400.0,-92700.0,-117754.11,-77957.99,-80000.0,-73882.83,-83230.0]},
   {n:'Plano de Saúde Sócios',lv:2,v:[-3089.37,-3089.37,-3089.37,-3089.37,-3089.37,-3089.37,-3445.99,-3445.99,-3445.99,-3520.76]},
-  {n:'4.10 Despesas Financeiras',lv:1,v:[-700.68,-452.11,-635.46,-632.19,-595.38,-573.59,-660.09,-2591.41,-615.51,-1419.2]},
-  {n:'Tarifas Bancárias',lv:2,v:[-312.89,-331.16,-435.31,-444.81,-444.81,-444.81,-446.79,-2211.01,-444.81,-1240.06]},
-  {n:'Tarifas DOC / TED',lv:2,v:[-387.79,-120.95,-200.15,-187.38,-150.57,-128.78,-213.3,-380.4,-170.7,-179.14]},
+  {n:'4.10 Despesas Financeiras',lv:1,v:[-700.68,-452.11,-635.46,-632.19,-595.38,-573.59,-660.09,-2591.41,-615.51,-1564.75]},
+  {n:'Tarifas Bancárias',lv:2,v:[-312.89,-331.16,-435.31,-444.81,-444.81,-444.81,-446.79,-2211.01,-444.81,-1314.25]},
+  {n:'Tarifas DOC / TED',lv:2,v:[-387.79,-120.95,-200.15,-187.38,-150.57,-128.78,-213.3,-380.4,-170.7,-250.5]},
   {n:'4.11 Outras Despesas',lv:1,v:[0.0,0.0,-100.0,-302.0,-90.0,-250.0,-1854.0,-409.0,-1080.8,-8.0]},
   {n:'Despesas a identificar',lv:2,v:[0.0,0.0,0.0,-300.0,-90.0,-200.0,-1854.0,-100.0,-1030.8,-8.0]},
   {n:'TROCO',lv:1,v:[0.0,0.0,-100.0,-2.0,0.0,-50.0,0.0,-309.0,-50.0,0.0]},
-  {n:'5.01 Bens Imobilizados da Empresa',lv:1,v:[-11478.6,-6187.6,-7905.66,-7502.76,-7849.78,-10189.78,-1665.07,-2414.97,-1742.1,-941.96]},
+  {n:'5.01 Bens Imobilizados da Empresa',lv:1,v:[-11478.6,-6187.6,-7905.66,-7502.76,-7849.78,-10189.78,-1665.07,-2414.97,-1742.1,-2204.04]},
   {n:'Máquinas, Equipamentos e Instalações Industriais',lv:2,v:[-9363.65,-4958.4,-5555.65,-5555.65,-6555.65,-4555.65,0.0,0.0,-207.03,-417.03]},
   {n:'Móveis, Utensílios e Instalações Administrativos',lv:2,v:[-80.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},
   {n:'Móveis, Utensílios e Instalações Comerciais',lv:2,v:[0.0,0.0,0.0,0.0,0.0,-3300.0,0.0,0.0,0.0,0.0]},
-  {n:'Software / Licença de Uso',lv:2,v:[-2034.95,-1229.2,-2350.01,-1947.11,-1294.13,-2334.13,-1665.07,-2414.97,-1535.07,-524.93]},
-  {n:'5.02 Empréstimos e Financiamentos',lv:1,v:[-40296.17,-16515.16,-16251.72,-16333.05,-16219.24,-41871.65,-40680.02,-41862.1,-39769.71,-38649.99]},
-  {n:'Empréstimos de Bancos',lv:2,v:[-40296.17,-16515.16,-16251.72,-16333.05,-16219.24,-41871.65,-40680.02,-41862.1,-39769.71,-38649.99]},
-  {n:'CARTAO DE CREDITO EMPRESARIAL',lv:1,v:[-65293.56,-71765.95,-85838.18,-99576.77,-129737.19,-141697.2,-174844.66,-172224.43,-184686.76,-134799.04]},
+  {n:'Software / Licença de Uso',lv:2,v:[-2034.95,-1229.2,-2350.01,-1947.11,-1294.13,-2334.13,-1665.07,-2414.97,-1535.07,-1787.01]},
+  {n:'5.02 Empréstimos e Financiamentos',lv:1,v:[-40296.17,-16515.16,-16251.72,-16333.05,-16219.24,-41871.65,-40680.02,-41862.1,-39769.71,-40150.01]},
+  {n:'Empréstimos de Bancos',lv:2,v:[-40296.17,-16515.16,-16251.72,-16333.05,-16219.24,-41871.65,-40680.02,-41862.1,-39769.71,-40150.01]},
+  {n:'CARTAO DE CREDITO EMPRESARIAL',lv:1,v:[-65293.56,-71765.95,-85838.18,-99576.77,-129737.19,-141697.2,-174844.66,-172224.43,-184686.76,-204642.0]},
   {n:'consorcio',lv:1,v:[-1225.39,-2018.46,-1751.74,-8694.01,-1092.87,-1577.32,-1584.39,-1607.68,-1593.45,-1376.06]},
   {n:'DEVOLUÇÃO',lv:1,v:[0.0,0.0,-717.0,-4619.16,-77.88,-820.28,0.0,0.0,0.0,0.0]},
   {n:'FRETE',lv:1,v:[-569.97,0.0,0.0,0.0,0.0,-740.0,0.0,-60.0,-80.0,0.0]},
-  {n:'Fretes pagos',lv:2,v:[-69.9,-24.95,-144.75,-39.95,-24.95,-248.8,-50.78,-322.41,-348.71,-186.29]},
-  {n:'PAGAMENTO AVULSO FUNCIONARIO',lv:1,v:[-41330.0,-47779.43,-33330.0,-28590.0,-34980.0,-53489.0,-45644.0,-34975.0,-46375.0,-22075.0]},
-  {n:'PENSÃO',lv:1,v:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-1175.01,-1175.01]},
-  {n:'TAXA DE LICENÇA PREFEITURA',lv:1,v:[-93.74,-93.74,-202.13,-93.74,-93.74,-899.37,-669.25,-93.74,-93.74,-265.14]},
-  {n:'Geração de Caixa do Período',lv:0,v:[-128784.1,126516.02,52414.13,-25061.48,-100456.34,-17219.26,-140163.8,-78164.98,-179321.29,27556.7]},
+  {n:'Fretes pagos',lv:2,v:[-69.9,-24.95,-144.75,-39.95,-24.95,-248.8,-50.78,-322.41,-348.71,-271.19]},
+  {n:'PAGAMENTO AVULSO FUNCIONARIO',lv:1,v:[-41330.0,-47779.43,-33330.0,-28590.0,-34980.0,-53489.0,-45644.0,-34975.0,-46375.0,-30675.0]},
+  {n:'PENSÃO',lv:1,v:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-1175.01,-2583.68]},
+  {n:'TAXA DE LICENÇA PREFEITURA',lv:1,v:[-93.74,-93.74,-202.13,-93.74,-93.74,-899.37,-669.25,-93.74,-93.74,-358.88]},
+  {n:'Geração de Caixa do Período',lv:0,v:[-128784.1,126516.02,52414.13,-25061.48,-100456.34,-17219.26,-140163.8,-69944.98,-184132.13,51440.36]},
 ];
 let _fluxoAno = '2025';
 function setFluxoAno(ano){
@@ -1835,10 +1783,47 @@ function setFluxoAno(ano){
   renderFluxo();
 }
 
+let _chartFluxoLinha = null;
 function renderFluxo(){
   const rows = _fluxoAno==='2025' ? FLUXO_2025 : FLUXO_2026;
   const cols = _fluxoAno==='2025' ? FLUXO_COLS_2025 : FLUXO_COLS_2026;
   const nc = cols.length;
+  // Gráfico de linha: Recebimentos × Despesas × Resultado
+  setTimeout(()=>{
+    const cl = document.getElementById('chart-fluxo-linha');
+    if(cl && cl.offsetParent!==null){
+      if(_chartFluxoLinha) _chartFluxoLinha.destroy();
+      const rRec = rows.find(r=>r.n==='Total de Recebimentos');
+      const rPag = rows.find(r=>r.n==='Total de Pagamentos');
+      const rGer = rows.find(r=>r.n==='Geração de Caixa do Período');
+      if(rRec && rPag && rGer){
+        _chartFluxoLinha = new Chart(cl, {
+          type:'line',
+          data:{
+            labels: cols,
+            datasets:[
+              {label:'Recebimentos', data: rRec.v, borderColor:'#10b981', backgroundColor:'rgba(16,185,129,.08)', tension:.35, pointRadius:4, pointHoverRadius:6, fill:true, borderWidth:2.5},
+              {label:'Despesas', data: rPag.v.map(v=>Math.abs(v)), borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,.06)', tension:.35, pointRadius:4, pointHoverRadius:6, fill:true, borderWidth:2.5},
+              {label:'Resultado', data: rGer.v, borderColor:'#378ADD', backgroundColor:'rgba(55,138,221,.08)', tension:.35, pointRadius:5, pointHoverRadius:7, fill:false, borderWidth:2.5,
+               segment:{borderDash: ctx => rGer.v[ctx.p1DataIndex] < 0 ? [5,4] : undefined}}
+            ]
+          },
+          options:{
+            responsive:true, maintainAspectRatio:false,
+            interaction:{mode:'index', intersect:false},
+            plugins:{
+              legend:{display:true, position:'top', labels:{boxWidth:12, font:{size:11}}},
+              tooltip:{callbacks:{label: ctx => ctx.dataset.label+': '+(ctx.parsed.y<0?'-':'')+brlk(Math.abs(ctx.parsed.y))}}
+            },
+            scales:{
+              y:{grid:{color:'#e0e4ef'}, ticks:{callback:v=>brlk(v)}, border:{dash:[3,3]}},
+              x:{grid:{display:false}}
+            }
+          }
+        });
+      }
+    }
+  }, 60);
   // KPIs: pegar ultima coluna disponível
   const lastIdx = nc-1;
   const totRec = rows.find(r=>r.n==='Total de Recebimentos');
