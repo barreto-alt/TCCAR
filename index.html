@@ -124,6 +124,7 @@ tr.demitido:hover td { background: #f3f4f6 !important; }
   <div class="tab" onclick="showTab('fluxo')">💵 Fluxo</div>
   <div class="tab" onclick="showTab('acoes')">🎯 Ações</div>
   <div class="tab" onclick="showTab('cartoes')">💳 Cartões</div>
+  <div class="tab" onclick="showTab('pontapraia')">🏖️ Ponta da Praia</div>
 </div>
 
 <!-- COLABORADORES -->
@@ -421,6 +422,86 @@ tr.demitido:hover td { background: #f3f4f6 !important; }
 
 <!-- Cards detail -->
 <div id="cc-lista"></div>
+</div>
+
+<!-- PONTA DA PRAIA -->
+<div id="tab-pontapraia" class="content">
+<style>
+.pp-section{background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:0;margin-bottom:16px;overflow:hidden;}
+.pp-section-header{background:#1a1a2e;color:white;padding:9px 16px;font-size:.82rem;font-weight:700;letter-spacing:.5px;}
+.pp-row{display:grid;grid-template-columns:1fr auto;padding:7px 16px;border-bottom:1px solid #f0f2f5;align-items:center;}
+.pp-row:last-child{border-bottom:none;}
+.pp-row.group{background:#e8f0fb;font-weight:700;font-size:.88rem;}
+.pp-row.item{font-size:.83rem;color:#374151;padding-left:28px;}
+.pp-row.item .pp-label{color:#6b7280;}
+.pp-row.sep{height:6px;background:#f8faff;border:none;}
+.pp-val{font-weight:600;font-size:.87rem;text-align:right;}
+.pp-val.pos{color:#10b981;}
+.pp-val.neg{color:#e94560;}
+.pp-total-row{display:grid;grid-template-columns:1fr auto;padding:11px 16px;font-weight:700;font-size:.95rem;align-items:center;border-top:2px solid #1a1a2e;}
+.pp-total-row.ativo{background:#d1fae5;}
+.pp-total-row.passivo{background:#fee2e2;}
+.pp-total-row.resultado{background:#1a1a2e;color:white;border-radius:0 0 12px 12px;}
+.pp-sel{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+.pp-btn{padding:6px 14px;border-radius:6px;border:1.5px solid #d1d5db;background:white;color:#374151;cursor:pointer;font-size:.8rem;font-weight:600;}
+.pp-btn.active{background:#185FA5;border-color:#185FA5;color:white;}
+</style>
+
+<div class="pp-sel">
+  <div class="section-title" style="margin:0">🏖️ Ponta da Praia — DRE</div>
+  <div style="margin-left:auto;display:flex;gap:6px;">
+    <button class="pp-btn active" id="pp-btn-out" onclick="setPPMes('out')">Out/26</button>
+  </div>
+</div>
+
+<!-- KPIs -->
+<div class="kpi-row" style="margin-bottom:16px" id="pp-kpis">
+  <div class="kpi green"><div class="kpi-val">R$ 54.988</div><div class="kpi-label">Receitas (Out)</div></div>
+  <div class="kpi" style="border-left-color:#e94560"><div class="kpi-val">R$ 39.747</div><div class="kpi-label">Despesas (Out)</div></div>
+  <div class="kpi" style="border-left-color:#10b981"><div class="kpi-val" style="color:#10b981">R$ 15.242</div><div class="kpi-label">Resultado (Out)</div></div>
+  <div class="kpi blue"><div class="kpi-val">27,7%</div><div class="kpi-label">Margem líquida</div></div>
+</div>
+
+<!-- Tabela DRE -->
+<div class="pp-section">
+  <div class="pp-section-header">📈 RECEITAS</div>
+  <div class="pp-row group"><span>Outras Receitas</span><span class="pp-val pos">R$ 640,00</span></div>
+  <div class="pp-row item"><span class="pp-label">Terceirização</span><span class="pp-val pos">R$ 640,00</span></div>
+  <div class="pp-row sep"></div>
+  <div class="pp-row group"><span>Produção Mão de Obra</span><span class="pp-val pos">R$ 54.348,73</span></div>
+  <div class="pp-row item"><span class="pp-label">Antecipação 2x</span><span class="pp-val pos">R$ 7.900,00</span></div>
+  <div class="pp-row item"><span class="pp-label">Antecipação 3x</span><span class="pp-val pos">R$ 3.320,10</span></div>
+  <div class="pp-row item"><span class="pp-label">Antecipação 4x</span><span class="pp-val pos">R$ 6.109,35</span></div>
+  <div class="pp-row item"><span class="pp-label">Antecipação 6x</span><span class="pp-val pos">R$ 5.627,25</span></div>
+  <div class="pp-row item"><span class="pp-label">Crédito 1x</span><span class="pp-val pos">R$ 12.555,76</span></div>
+  <div class="pp-row item"><span class="pp-label">Débito MO</span><span class="pp-val pos">R$ 1.336,27</span></div>
+  <div class="pp-row item"><span class="pp-label">Dinheiro MO</span><span class="pp-val pos">R$ 750,00</span></div>
+  <div class="pp-row item"><span class="pp-label">Pix / Transferência MO</span><span class="pp-val pos">R$ 16.750,00</span></div>
+</div>
+
+<div class="pp-section">
+  <div class="pp-section-header">📉 DESPESAS</div>
+  <div class="pp-row group"><span>Despesas Fixas</span><span class="pp-val neg">-R$ 16.732,32</span></div>
+  <div class="pp-row item"><span class="pp-label">Água</span><span class="pp-val neg">-R$ 172,74</span></div>
+  <div class="pp-row item"><span class="pp-label">Aluguel</span><span class="pp-val neg">-R$ 15.000,00</span></div>
+  <div class="pp-row item"><span class="pp-label">Luz</span><span class="pp-val neg">-R$ 819,56</span></div>
+  <div class="pp-row item"><span class="pp-label">Seguro</span><span class="pp-val neg">-R$ 740,02</span></div>
+  <div class="pp-row sep"></div>
+  <div class="pp-row group"><span>Despesas Operacionais</span><span class="pp-val neg">-R$ 10.274,83</span></div>
+  <div class="pp-row item"><span class="pp-label">Materiais</span><span class="pp-val neg">-R$ 9.074,83</span></div>
+  <div class="pp-row item"><span class="pp-label">Serviço de Terceiro</span><span class="pp-val neg">-R$ 1.200,00</span></div>
+  <div class="pp-row sep"></div>
+  <div class="pp-row group"><span>Funcionários</span><span class="pp-val neg">-R$ 12.740,00</span></div>
+  <div class="pp-row item"><span class="pp-label">Salário</span><span class="pp-val neg">-R$ 10.460,00</span></div>
+  <div class="pp-row item"><span class="pp-label">Vale</span><span class="pp-val neg">-R$ 1.280,00</span></div>
+  <div class="pp-row item"><span class="pp-label">Vale Transporte</span><span class="pp-val neg">-R$ 1.000,00</span></div>
+</div>
+
+<div class="pp-section">
+  <div class="pp-total-row ativo"><span>Total Acréscimos (Ativo)</span><span style="color:#10b981;font-size:.95rem">R$ 54.988,73</span></div>
+  <div class="pp-total-row passivo"><span>Total Decréscimos (Passivo)</span><span style="color:#e94560;font-size:.95rem">-R$ 39.747,15</span></div>
+  <div class="pp-total-row resultado"><span>RESULTADO</span><span style="color:#6ee7b7;font-size:1.1rem">R$ 15.241,58</span></div>
+</div>
 </div>
 
 <!-- AÇÕES -->
@@ -2220,7 +2301,7 @@ function renderFinanceiro(){
 }
 
 function showTab(tab) {
-  ['colab','pcmso','ferias','uniformes','faturamento','financeiro','saldos','fluxo','acoes','cartoes'].forEach((t,i)=>{
+  ['colab','pcmso','ferias','uniformes','faturamento','financeiro','saldos','fluxo','acoes','cartoes','pontapraia'].forEach((t,i)=>{
     document.querySelectorAll('.tab')[i].classList.toggle('active',t===tab);
     document.getElementById('tab-'+t).classList.toggle('active',t===tab);
   });
@@ -2231,6 +2312,7 @@ function showTab(tab) {
   if(tab==='acoes') renderAcoes();
   if(tab==='cartoes') renderCartoes();
 }
+function setPPMes(mes) {}
 
 // ─── CARTÕES ──────────────────────────────────────────────────────────────────
 const CARTOES = [
